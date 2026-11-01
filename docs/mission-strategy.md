@@ -85,3 +85,17 @@
 - 핵심 결정 변경 시 문서→테스트→코드→데모 설명의 연쇄 정합성을 검토한다.
 - 실제 구현에서는 명세 또는 테스트 미충족을 이유와 함께 기록하고 AI 수정 루프를 실행한다.
 - 소스에 확정된 요구사항은 임의로 삭제하거나 완화하지 않는다.
+
+
+## 설계 확정 결과 (2026-11-02)
+
+초기 전략의 '열려 있는 결정'은 후속 설계 과정에서 다음과 같이 결론 냈다. 결정 이유·대안·한계는 [design.md](design.md) ADR-01~15에 기록했다.
+
+- 내부 JSONL/외부 CSV, 카테고리 선등록, 양의 정수 금액, UUID 거래 ID.
+- list/search 최신순은 날짜 내림차순+동일 날짜 원본 파일 순서 역순; 기본 20건·최대 1000건의 bounded heap 스트리밍.
+- 파일 변경은 임시 파일·fsync·os.replace, 단일 사용자 배타 잠금; 다중 파일 원자적 트랜잭션은 지원 범위 밖.
+- CSV import는 전건 검증·전건 롤백, export는 CSV 스키마/월 또는 기간 필수.
+- CLI는 이중 하이픈(`--`) 채택. 원문 기능 요구사항과 예시를 우선하고, 제약사항의 단일 하이픈 표기 충돌은 ADR-12로 보존.
+- 최종 문서 체계: [design.md](design.md), [spec.md](spec.md), [acceptance.md](acceptance.md), [demo.md](demo.md), [learning-map.md](learning-map.md), [implementation-plan.md](implementation-plan.md), 루트 [AGENTS.md](../AGENTS.md).
+
+**상태 구분:** 설계와 검수 기준 문서 작성은 완료. 실제 코드 구현, 테스트, 성능 측정, 데모 수행과 최종 승인은 아직 진행하지 않았다.

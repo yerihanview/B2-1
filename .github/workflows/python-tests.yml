@@ -1,0 +1,33 @@
+name: Python Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python 3.10 unittest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Verify test suite exists
+        run: |
+          test -d tests
+          python - <<'PY'
+          from pathlib import Path
+          tests = list(Path("tests").rglob("test_*.py"))
+          if not tests:
+              raise SystemExit("No test_*.py files exist. CI cannot pass without tests.")
+          print(f"Discovered {len(tests)} test files.")
+          PY
+      - name: Run unit and integration tests
+        run: python -m unittest discover -s tests -v

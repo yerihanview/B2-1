@@ -1,6 +1,6 @@
 # B2-1 최종 데모 및 증빙 설계 v1.0
 
-상태: 시연 시나리오. 가상 데이터 CLI 자동 시연은 scripts/smoke.py로 재현하며 실행 결과는 evidence/01-cli-demo.txt 참조. 사람의 최종 데모 승인은 별도다. **15분은 사용자 제안 목표이며 공식 평가 시간 제한이 아니다.**
+상태: 시연 시나리오. 가상 데이터 CLI 자동 시연은 scripts/smoke.py로 재현하며 실행 결과는 evidence/toomuch/01-cli-demo.txt 참조. 사람의 최종 데모 승인은 별도다. **15분은 사용자 제안 목표이며 공식 평가 시간 제한이 아니다.**
 
 ## 준비
 - Python 버전과 git commit 기록. 테스트용 임시 data-dir 사용, 개인정보 제외.

@@ -2,7 +2,7 @@
 
 Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부다. 거래·카테고리·예산을 JSONL 세 파일로 저장하고 CSV로 가져오기/내보내기한다. 백업·월별 반복 내역·한글 테이블 정렬·저장 원자성 보너스도 필수 범위에 포함한다. 외부 패키지 설치는 필요 없다.
 
-**제출 상태:** 사용자 승인 후 PR #1을 main에 병합했다. [제출물 점검](docs/submission-check.md), [평가 대비 설명](docs/evaluation-guide.md), [최종 검토](docs/final-review.md), [단계별 검수 기록](docs/validation-results.md)을 확인할 수 있다. 로컬 검증, 원격 GitHub Actions, 사람의 최종 데모 승인을 구분한다. 공식 미션·평가표는 첨부 원문으로 대조했으며 사용자 요청에 따라 저장소에 포함하지 않는다.
+**제출 상태:** 사용자 승인 후 PR #1을 main에 병합했으며 Python 3.10·3.12에서 각각 117개 검수를 통과했다. [평가 대비 설명](docs/evaluation-guide.md)을 참고할 수 있다. 과거 운영·검수 문서는 [docs/toomuch](docs/toomuch/), 실행 로그는 [evidence/toomuch](evidence/toomuch/)에 보관한다. 공식 미션·평가표 원문은 사용자 요청에 따라 저장소에 포함하지 않는다.
 
 ## 실행
 
@@ -128,10 +128,8 @@ python scripts/benchmark.py --repeat 1
 ## 설계·평가·학습 자료
 
 - [아키텍처와 ADR](docs/design.md), [상세 명세](docs/spec.md), [평가항목과 검수 기준](docs/acceptance.md)
-- [구현·역할 분담 계획](docs/implementation-plan.md), [실패 처리 정책](docs/failure-policy.md), [에이전트 지침](AGENTS.md)
-- [미션 수행 전략](docs/mission-strategy.md), [학습 개념 지도](docs/learning-map.md), [데모](docs/demo.md)
-- [인수인계 검토 기록](docs/handover-review.md), [검수 결과와 증거](docs/validation-results.md)
-- [GitHub 제출 점검표](docs/submission-check.md), [평가 대비 설명과 연습 질문](docs/evaluation-guide.md)
+- [에이전트 지침](AGENTS.md), [평가 대비 설명과 연습 질문](docs/evaluation-guide.md)
 - [과잉 운영 검토 원문](docs/overengineering-review.md), [원인·재발 방지 지침·소스 재검토 설명](docs/overengineering-followup.md)
+- [과거 운영·검수 문서](docs/toomuch/), [과거 실행 로그](evidence/toomuch/): 필요할 때만 참고하는 보관 자료
 
 공식 미션 달성과 별도로 명세 중심 AI 개발 운영법을 연구한다. 이 개인 연구는 공식 평가항목이 아니며 불필요한 하네스·로그 수집보다 실제 기능·안전성 검수를 우선한다.

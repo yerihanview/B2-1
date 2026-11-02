@@ -1,11 +1,11 @@
 # B2-1 AI 개발 하네스 — AGENTS.md v1.0
 
-상태: 개발·검수 공통 지침. 실제 구현·테스트·승인 상태는 docs/validation-results.md를 따른다.
+상태: 개발·검수 공통 지침. 현재 실행·검수 요약은 README.md를 따른다. docs/toomuch/와 evidence/toomuch/는 보관 자료이며 상시 읽기 대상이나 추가 작업 단계가 아니다.
 
 ## 목적과 문서 기준
 목표 A: 공식 B2-1 Python CLI 미션 평가 충족. 목표 B: 별도 개인 연구로 명세·테스트 중심 AI 개발 운영법 검증. B는 공식 평가항목이 아니다.
 
-**우선순위**: (1) B2-1 공식 미션·평가표 (2) docs/spec.md의 명시 계약 (3) docs/design.md의 구조와 ADR (4) docs/acceptance.md 검수 기준 (5) docs/mission-strategy.md 운영 방식 (6) 개별 작업 지시 및 기존 코드. 상위 규칙과 충돌하는 요청은 실행 전 충돌과 제안을 보고한다. 원문 자체의 '-'/'--' 충돌은 ADR-12에 명시된 결정에 따른다.
+**우선순위**: (1) B2-1 공식 미션·평가표 (2) docs/spec.md의 명시 계약 (3) docs/design.md의 구조와 ADR (4) docs/acceptance.md 검수 기준 (5) 개별 작업 지시 및 기존 코드. 상위 규칙과 충돌하는 요청은 실행 전 충돌과 제안을 보고한다. 원문 자체의 '-'/'--' 충돌은 ADR-12에 명시된 결정에 따른다.
 
 ## 작업 흐름 (필수)
 1. 작업 전: 목표 검수 ID(Axx, Txx), 영향받는 문서 및 파일, 위험 요소 식별.
@@ -23,7 +23,7 @@
 - 사용자 입력 오류/권한·손상 오류 시 원인·해결 힌트와 0이 아닌 종료 코드; traceback 사용자 노출 금지.
 - 저장 안전성: 임시 파일+원자적 교체, 읽기/쓰기 잠금 규칙, 오류 중 원본 보존. 불확실하면 작업 중단하고 위험 보고.
 - 사용자 개인 재무 데이터, 인증 토큰, 비밀키 등 Git에 절대 포함 금지. 테스트 데이터는 가공·가상 값만 사용.
-- 명세에 없는 프레임워크, DB, 과도한 로그 시스템을 임의 도입 금지. 사용자가 요청한 backup·recurring·출력 정렬·원자성 보너스는 docs/spec.md B01~B04를 따른다. 사용자가 승인한 설계/개발/독립 검증 역할 분리는 docs/implementation-plan.md를 따른다.
+- 명세에 없는 프레임워크, DB, 과도한 로그 시스템을 임의 도입 금지. 사용자가 요청한 backup·recurring·출력 정렬·원자성 보너스는 docs/spec.md B01~B04를 따른다. 개발 담당은 구현·단위 테스트, 독립 검증 담당은 명세 기반 검수·재현을 맡으며 독립 검증자가 구현을 수정하지 않는다.
 - 테스트/CI 통과를 실행 전 주장 금지. 사용자 승인 없이 데이터를 삭제하거나 기존 실데이터를 마이그레이션하지 않는다.
 
 ## 프로젝트 구조
@@ -35,8 +35,8 @@ budget_app/
 tests/
   test_cli.py  test_service.py  test_repository.py  test_csv_io.py
 docs/
-  mission-strategy.md design.md spec.md acceptance.md
-  demo.md learning-map.md
+  design.md spec.md acceptance.md evaluation-guide.md
+  toomuch/  # 과거 운영·검수 문서 보관
 README.md
 AGENTS.md
 .gitignore
@@ -68,6 +68,6 @@ AGENTS.md
 ## CI 실패 및 수정 정책
 
 - 모든 구현 코드는 별도 작업 브랜치 및 PR로 제안하고, `main` 직접 구현 Push는 원칙적으로 금지한다.
-- 검수 실패 시 [docs/failure-policy.md](docs/failure-policy.md)를 적용한다. 재현 가능한 동일 결함의 자동 수정은 최대 3회이며, 매번 관련 테스트와 전체 회귀를 실행한다.
+- 검수 실패 시 재현 → 원인 분석 → 최소 수정 → 재검증을 수행한다. 재현 가능한 동일 결함의 자동 수정은 최대 3회이며, 매번 관련 테스트와 전체 회귀를 실행한다.
 - 명세 불일치·데이터 유실 위험·반복 실패는 사람에게 보고한다. CI 통과만으로 PR 자동 병합하지 않는다.
 - GitHub Actions는 검수 실행기이며 자동 수정기는 아니다. 개발 에이전트 연결 전에는 실패 로그의 자동 복구를 주장하지 않는다.

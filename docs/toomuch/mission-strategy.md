@@ -31,7 +31,7 @@
 - `docs/acceptance.md`: 평가표 추적과 검수 게이트
 - `AGENTS.md`: AI 작업 지침 및 허용·금지 범위
 - `tests/`: 자동 검증
-- 데모 시나리오·핵심 도식은 필요에 따라 `docs/demo.md`로 작성한다.
+- 데모 시나리오·핵심 도식은 필요에 따라 `docs/toomuch/demo.md`로 작성한다.
 
 ## 4. 최종 데모 초안 (약 15분, 공식 시간 요건 아님)
 
@@ -89,13 +89,13 @@
 
 ## 설계 확정 결과 (2026-11-02)
 
-초기 전략의 '열려 있는 결정'은 후속 설계 과정에서 다음과 같이 결론 냈다. 결정 이유·대안·한계는 [design.md](design.md) ADR-01~15에 기록했다.
+초기 전략의 '열려 있는 결정'은 후속 설계 과정에서 다음과 같이 결론 냈다. 결정 이유·대안·한계는 [design.md](../design.md) ADR-01~15에 기록했다.
 
 - 내부 JSONL/외부 CSV, 카테고리 선등록, 양의 정수 금액, UUID 거래 ID.
 - list/search 최신순은 날짜 내림차순+동일 날짜 원본 파일 순서 역순; 기본 20건·최대 1000건의 bounded heap 스트리밍. 선택 힙은 O(K), 전체 중복 ID 검증 집합은 O(N)이며 전체 명령 O(K)를 주장하지 않는다.
 - 파일 변경은 임시 파일·fsync·os.replace, 단일 사용자 배타 잠금; 다중 파일 원자적 트랜잭션은 지원 범위 밖.
 - CSV import는 전건 검증·전건 롤백, export는 CSV 스키마/월 또는 기간 필수.
 - CLI는 이중 하이픈(`--`) 채택. 원문 기능 요구사항과 예시를 우선하고, 제약사항의 단일 하이픈 표기 충돌은 ADR-12로 보존.
-- 최종 문서 체계: [design.md](design.md), [spec.md](spec.md), [acceptance.md](acceptance.md), [demo.md](demo.md), [learning-map.md](learning-map.md), [implementation-plan.md](implementation-plan.md), 루트 [AGENTS.md](../AGENTS.md).
+- 최종 문서 체계: [design.md](../design.md), [spec.md](../spec.md), [acceptance.md](../acceptance.md), [demo.md](demo.md), [learning-map.md](learning-map.md), [implementation-plan.md](implementation-plan.md), 루트 [AGENTS.md](../../AGENTS.md).
 
 **당시 상태(설계 확정 시점):** 설계와 검수 기준 문서 작성 완료, 코드·테스트·측정·데모는 미실행이었다. 이후 구현·자동 검수 기록은 [validation-results.md](validation-results.md), 현재 승인·병합·제출 상태는 [submission-check.md](submission-check.md)를 따른다.

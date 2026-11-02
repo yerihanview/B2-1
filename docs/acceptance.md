@@ -1,6 +1,6 @@
 # B2-1 검수 계획 및 품질 게이트 v1.0
 
-상태: 구현·로컬 자동 검수 결과는 [validation-results.md](validation-results.md) 참조. **코드·실행 결과에 대한 사용자 승인과 PR #1 병합은 완료했다. 최신 제출 상태는 [submission-check.md](submission-check.md)를 따른다. 평가에서 사용자 스스로 설명할 수 있는지는 별도 확인 대상이다.** 기준: 공식 미션, 평가항목, docs/spec.md, docs/design.md.
+상태: 구현·로컬 자동 검수 결과는 [toomuch/validation-results.md](toomuch/validation-results.md) 참조. **코드·실행 결과에 대한 사용자 승인과 PR #1 병합은 완료했다. 최신 제출 상태는 [toomuch/submission-check.md](toomuch/submission-check.md)를 따른다. 평가에서 사용자 스스로 설명할 수 있는지는 별도 확인 대상이다.** 기준: 공식 미션, 평가항목, docs/spec.md, docs/design.md.
 
 ## 검수 원칙
 - 공식 평가 체크리스트의 각 항목에 테스트 ID, 증거, 설명 자료를 연결한다. 사람이 평가할 설명의 타당성과 자동 검수 결과를 혼동하지 않는다.
@@ -68,7 +68,7 @@
 
 ## CI 실패 처리 및 병합 게이트
 
-[실패 처리 정책](failure-policy.md)에 따라 PR 검수 실패→AI 수정(동일 결함 3회 이하)→전체 회귀→재검수→인간 승인을 적용한다. 위험한 데이터 변경/명세 충돌 시 인간 판단이 우선한다. GitHub Branch protection/Ruleset이 설정되기 전에는 병합 차단이 기술적으로 강제되지 않는다.
+[실패 처리 정책](toomuch/failure-policy.md)에 따라 PR 검수 실패→AI 수정(동일 결함 3회 이하)→전체 회귀→재검수→인간 승인을 적용한다. 위험한 데이터 변경/명세 충돌 시 인간 판단이 우선한다. GitHub Branch protection/Ruleset이 설정되기 전에는 병합 차단이 기술적으로 강제되지 않는다.
 
 ## 보강 검수 계약
 
@@ -98,8 +98,8 @@
 
 독립 검증자는 위 계약에서 별도 CLI 테스트를 작성하고 개발 단위·장애 주입 테스트와 함께 최종 SHA에서 양 Python 버전 회귀를 실행한다. 원격 Actions·사람의 최종 데모/병합은 별도 승인이다.
 
-보너스 추가 당시 113개/독립 CLI 48개 기록은 validation-results.md의 B01~B04 절에 보존한다. 최종 검토 후 최신 결과는 [final-review.md](final-review.md)의 전체 117개/독립 CLI 50개를 따른다. 원격 CI와 G2 사람의 최종 승인은 구분한다.
+보너스 추가 당시 113개/독립 CLI 48개 기록은 toomuch/validation-results.md의 B01~B04 절에 보존한다. 최종 검토 후 최신 결과는 [toomuch/final-review.md](toomuch/final-review.md)의 전체 117개/독립 CLI 50개를 따른다. 원격 CI와 G2 사람의 최종 승인은 구분한다.
 
 ## 제출 및 사용자 승인 상태
 
-사용자가 최종 결과를 승인하여 PR #1을 main에 병합했다. 실행 결과에 대한 승인과 사용자가 평가에서 직접 설명할 수 있는지는 구분한다. 설명 준비는 [evaluation-guide.md](evaluation-guide.md), 제출물 확인 결과는 [submission-check.md](submission-check.md)를 따른다. 기존 실행 로그와 판단 근거는 변경하지 않는다.
+사용자가 최종 결과를 승인하여 PR #1을 main에 병합했다. 실행 결과에 대한 승인과 사용자가 평가에서 직접 설명할 수 있는지는 구분한다. 설명 준비는 [evaluation-guide.md](evaluation-guide.md), 제출물 확인 결과는 [toomuch/submission-check.md](toomuch/submission-check.md)를 따른다. 기존 실행 로그와 판단 근거는 변경하지 않는다.

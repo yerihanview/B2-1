@@ -1,6 +1,6 @@
 # 구현·검수 결과
 
-현재는 사용자 승인 후 PR #1이 main에 병합된 상태다. [최종 제출물 점검](submission-check.md)과 [평가 대비 설명](evaluation-guide.md)을 추가했다. 아래는 단계별 당시 기록이며, 과거의 승인 대기·원격 미확인 표현과 현재 상태를 구분한다.
+현재는 사용자 승인 후 PR #1이 main에 병합된 상태다. [최종 제출물 점검](submission-check.md)과 [평가 대비 설명](../evaluation-guide.md)을 추가했다. 아래는 단계별 당시 기록이며, 과거의 승인 대기·원격 미확인 표현과 현재 상태를 구분한다.
 
 최신 상태: 최종 PR 검토 중 발견한 큰 합계 오류를 수정했다. 최신 전체 회귀와 CI·승인 대상은 [final-review.md](final-review.md)를 따른다. 아래 71개·113개 결과는 각각 당시 고정 소스의 실행 기록이다.
 
@@ -14,14 +14,14 @@
 
 | 검사 | 결과 | 근거 |
 |---|---|---|
-| Python 3.12.14 전체 회귀 | 71개, 실패·오류·스킵 0 | [로그](../evidence/04-tests-python312.txt) |
-| Python 3.10.22 전체 회귀 | 71개, 실패·오류·스킵 0 | [로그](../evidence/04-tests-python310.txt) |
-| 독립 CLI 검수 | 위 각 71개 중 30개. 명세에서 먼저 작성, 구현 import/수정 없이 subprocess 검수 | [테스트](../tests/test_acceptance_cli.py) |
+| Python 3.12.14 전체 회귀 | 71개, 실패·오류·스킵 0 | [로그](../../evidence/toomuch/04-tests-python312.txt) |
+| Python 3.10.22 전체 회귀 | 71개, 실패·오류·스킵 0 | [로그](../../evidence/toomuch/04-tests-python310.txt) |
+| 독립 CLI 검수 | 위 각 71개 중 30개. 명세에서 먼저 작성, 구현 import/수정 없이 subprocess 검수 | [테스트](../../tests/test_acceptance_cli.py) |
 | 개발 모델·서비스·장애 검수 | 위 각 71개 중 41개 | tests/test_models.py, test_service.py, test_repository.py, test_csv_io.py |
-| 실제 CLI 데모 | 정상·오류·혼합 CSV 롤백·별도 프로세스 재실행 통과 | [실행 로그](../evidence/01-cli-demo.txt), scripts/smoke.py |
-| 10만 건 측정·출력 검수 | 별도 측정 결과 아래 기록 | [원시 결과](../evidence/05-benchmark.jsonl), scripts/benchmark.py |
+| 실제 CLI 데모 | 정상·오류·혼합 CSV 롤백·별도 프로세스 재실행 통과 | [실행 로그](../../evidence/toomuch/01-cli-demo.txt), scripts/smoke.py |
+| 10만 건 측정·출력 검수 | 별도 측정 결과 아래 기록 | [원시 결과](../../evidence/toomuch/05-benchmark.jsonl), scripts/benchmark.py |
 | GitHub Actions | 원격 실행 미확인 | PR·수동 트리거 유지. 로컬 실행 결과를 원격 CI 성공으로 간주하지 않음 |
-| 사람의 최종 데모·병합 | 승인 대기 | docs/demo.md, acceptance.md G2 |
+| 사람의 최종 데모·병합 | 승인 대기 | docs/toomuch/demo.md, acceptance.md G2 |
 
 양 버전 테스트는 같은 고정 소스에서 실행했다. 증거 커밋은 실행 로그를 추가하기 때문에 실행 대상 소스 커밋과 구분한다. 자동 시연은 사람이 프로그램 구조와 설계 선택을 설명할 수 있는지를 보증하지 않는다.
 
@@ -82,13 +82,13 @@ N이 커지면 전체 무결성 검사와 조회 스캔 비용이 증가한다. 
 
 | 검사 | 결과 | 근거 |
 |---|---|---|
-| Python 3.10.22 전체 회귀 | 113개 통과, 실패·오류·스킵 0 | [전체 로그](../evidence/bonus-tests-python310.txt) |
-| Python 3.12.14 전체 회귀 | 113개 통과, 실패·오류·스킵 0 | [전체 로그](../evidence/bonus-tests-python312.txt) |
+| Python 3.10.22 전체 회귀 | 113개 통과, 실패·오류·스킵 0 | [전체 로그](../../evidence/toomuch/bonus-tests-python310.txt) |
+| Python 3.12.14 전체 회귀 | 113개 통과, 실패·오류·스킵 0 | [전체 로그](../../evidence/toomuch/bonus-tests-python312.txt) |
 | 독립 CLI | 기존 30개 + 보너스 18개, 위 전체 회귀에 포함 | test_acceptance_cli.py, test_bonus_acceptance.py |
 | 개발 단위·장애 | 기존 41개 + 보너스 24개, 위 전체 회귀에 포함 | test_bonus.py, test_bonus_service.py, test_bonus_formatting.py 및 기존 테스트 |
-| 기본 CLI 실제 시연 | 보너스 추가 후에도 통과 | [로그](../evidence/bonus-core-demo.txt) |
-| 보너스 CLI 실제 시연 | 월말·중복 방지·정렬·백업·가상 복구·과거 거래 보존 통과 | [로그](../evidence/bonus-demo.txt) |
-| 최신 10만 건 검사 | 결과·분석은 아래 최신 측정 절 참조 | [원시 결과](../evidence/bonus-benchmark.jsonl) |
+| 기본 CLI 실제 시연 | 보너스 추가 후에도 통과 | [로그](../../evidence/toomuch/bonus-core-demo.txt) |
+| 보너스 CLI 실제 시연 | 월말·중복 방지·정렬·백업·가상 복구·과거 거래 보존 통과 | [로그](../../evidence/toomuch/bonus-demo.txt) |
+| 최신 10만 건 검사 | 결과·분석은 아래 최신 측정 절 참조 | [원시 결과](../../evidence/toomuch/bonus-benchmark.jsonl) |
 
 - B01: 원본 바이트와 SHA-256/크기 manifest, 정확한 ZIP 구성·기타 파일 제외, 기존 백업 보존, 별도 폴더에서 CLI 복구 검증. 발행 전 오류는 원본 보존과 산출물 정리, 발행 후 디렉터리 fsync 오류는 완성 ZIP 보존과 반영됨 안내를 확인했다.
 - B02: 윤년·비윤년·30일 월말, 출처 멱등성, 수정 후 skip, 거래 삭제 후 새 ID 생성, 규칙 삭제 후 과거 거래 보존, 규칙 참조 카테고리 삭제 거부, 손상/중복 출처, apply 원자 교체와 무변경 skip 검수.

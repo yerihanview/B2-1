@@ -1,6 +1,6 @@
 # B2-1 상세 명세 v1.0
 
-상태: 구현 계약. 실제 구현·검증 결과는 validation-results.md 참조. 설계 선택과 이유는 docs/design.md ADR 참조. 공식 미션 요구사항 충돌 시 공식 문서 우선.
+상태: 구현 계약. 실제 구현·검증 결과는 toomuch/validation-results.md 참조. 설계 선택과 이유는 docs/design.md ADR 참조. 공식 미션 요구사항 충돌 시 공식 문서 우선.
 
 ## 실행 계약
 - Python 3.10+, 표준 라이브러리만. `python -m budget_app [--data-dir PATH] <command> [options]`.

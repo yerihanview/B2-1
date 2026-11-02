@@ -12,12 +12,12 @@
 
 | 항목 | 실제 결과 | 근거 |
 |---|---|---|
-| Python 3.10.22 전체 회귀 | 117개 통과, 실패·오류·스킵·예상 실패 0, 15.175초 | [최종 실행 요약](../evidence/final-verification.txt) |
+| Python 3.10.22 전체 회귀 | 117개 통과, 실패·오류·스킵·예상 실패 0, 15.175초 | [최종 실행 요약](../../evidence/toomuch/final-verification.txt) |
 | Python 3.12.14 전체 회귀 | 117개 통과, 실패·오류·스킵·예상 실패 0, 14.489초 | 같은 실행 요약 |
 | 검수 책임 분리 | 독립 CLI 50개(핵심 32+보너스 18), 개발 단위·장애 검수 67개 | tests/test_acceptance_cli.py, test_bonus_acceptance.py 및 개발 테스트 |
 | 기본 CLI 데모 | 거래·검색·요약·예산·카테고리·CSV·재시작·오류 모두 통과 | scripts/smoke.py, 최종 실행 요약 |
 | 보너스 CLI 데모 | 월말 보정·재실행 skip·정렬·ZIP 검증·가상 복구·규칙 삭제·백업 반복 생성 통과 | scripts/bonus_smoke.py, 최종 실행 요약 |
-| 10만 건 | 당시 고정 소스에서 출력/저장 검수와 측정 완료 | [원시 측정](../evidence/bonus-benchmark.jsonl), [분석](validation-results.md) |
+| 10만 건 | 당시 고정 소스에서 출력/저장 검수와 측정 완료 | [원시 측정](../../evidence/toomuch/bonus-benchmark.jsonl), [분석](validation-results.md) |
 | 첨부 공식 원문 | 텍스트 기준 요구/평가표 대조, 삽입 이미지는 범위 밖 | 원문은 사용자 요청에 따라 GitHub에 포함하지 않음 |
 
 이번 수정은 summary 출력과 사용률 계산 정밀도에 한정된다. 기존 P01의 list/search/add/update 경로와 benchmark 스크립트는 바뀌지 않아 10만 건 측정을 반복하지 않았다. 기존 성능값을 새 SHA에서 측정한 것처럼 표기하지 않는다.

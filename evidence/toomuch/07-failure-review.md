@@ -15,4 +15,4 @@
 
 ## 최종 PR 검토 추가 회귀
 
-4300자리 지출 2건의 합계 summary가 정수 문자열 변환 제한으로 traceback을 내는 P2를 예산 유무 양쪽에서 독립 CLI로 재현했다. 입력상한 신설/전역 제한 해제 없이 Decimal의 정확한 출력·자리수 계산으로 1차 수정했다. 최신 양버전 117개 회귀와 별도 읽기 전용 재검증은 final-verification.txt 및 docs/final-review.md에 기록한다.
+4300자리 지출 2건의 합계 summary가 정수 문자열 변환 제한으로 traceback을 내는 P2를 예산 유무 양쪽에서 독립 CLI로 재현했다. 입력상한 신설/전역 제한 해제 없이 Decimal의 정확한 출력·자리수 계산으로 1차 수정했다. 최신 양버전 117개 회귀와 별도 읽기 전용 재검증은 final-verification.txt 및 docs/toomuch/final-review.md에 기록한다.

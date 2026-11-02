@@ -82,6 +82,8 @@ python -m budget_app export --out export.csv --from 2024-01-01 --to 2024-01-31 -
 python -m budget_app import --from import.csv
 ```
 
+**주의:** `delete`는 확인 프롬프트 없이 거래를 삭제하며 자동 복구를 제공하지 않는다. 시연·검수에는 임시 폴더와 가상 데이터만 사용한다.
+
 `category add`, `add`, `category remove`는 대화형 입력이다. `update`는 **옵션 방식**으로 고정했다. `TX_EXAMPLE`은 문법 설명용 자리표시자이며 실제 거래 ID가 아니다. `category add`로 카테고리를 등록해야 거래를 추가할 수 있다. 실행 전 세부 명령 계약은 [docs/spec.md](docs/spec.md)를 따른다.
 
 ## 5. 저장 위치와 포맷 — 구현 예정
@@ -155,3 +157,5 @@ python -m unittest discover -s tests -v
 - **목표 A:** 공식 필수 기능·제약 및 평가항목 충족.
 - **목표 B:** 명세/설계/검수 조건을 사람이 통제하고 AI가 구현·테스트·수정하도록 하는 **최소 개발 하네스**의 효과 검증. 목표 B는 **공식 평가항목이 아님**.
 - 하네스 비용·실패·사람의 개입·재작업은 실제 관측 후 회고한다. 이를 위해 불필요한 스크린샷/로그 수집을 자동화하지 않는다.
+
+설계 검토 및 승인된 계약 보강: [인수인계 검토 기록](docs/handover-review.md). 공식 원문·평가표는 저장소에 없어 원문 대조는 미완료다.

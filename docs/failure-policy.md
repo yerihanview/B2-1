@@ -34,7 +34,7 @@ AI 작업 브랜치 → PR → CI 실행
 | 정상 테스트 통과 | CI 성공 로그·잔여 위험 요약 | 병합 전 최종 승인 |
 
 ## 구현 단계
-1. `.github/workflows/python-tests.yml`을 저장소에 추가: PR과 Push에 Python 3.10+ `unittest` 실행.
+1. `.github/workflows/python-tests.yml`을 저장소에 추가: PR과 수동 실행에 Python 3.10+ `unittest` 실행.
 2. 최소 실행 가능한 코드와 테스트를 추가한 뒤 CI의 실제 최초 결과 확인.
 3. GitHub 저장소 Settings → Rules → Rulesets 또는 Branch protection에서 `main`에 대해 필수 상태 검사와 PR 병합 승인 규칙 설정.
 4. AI 수정 루프는 개발 에이전트 연결 방식(클라우드 에이전트 또는 사람이 트리거하는 작업)에 따라 구현. **단순 CI YAML만으로 자동 수정까지 구현되는 것은 아니다.**

@@ -19,15 +19,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Verify test suite exists
+      - name: Run nonempty unit and integration suite
         run: |
-          test -d tests
           python - <<'PY'
-          from pathlib import Path
-          tests = list(Path("tests").rglob("test_*.py"))
-          if not tests:
-              raise SystemExit("No test_*.py files exist. CI cannot pass without tests.")
-          print(f"Discovered {len(tests)} test files.")
+          import sys
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover("tests")
+          discovered = suite.countTestCases()
+          if discovered == 0:
+              raise SystemExit("No test cases discovered. CI cannot pass without tests.")
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          skipped = len(result.skipped)
+          print(f"discovered={discovered}, run={result.testsRun}, "
+                f"failures={len(result.failures)}, errors={len(result.errors)}, "
+                f"skipped={skipped}, expected_failures={len(result.expectedFailures)}, "
+                f"unexpected_successes={len(result.unexpectedSuccesses)}")
+          sys.exit(0 if result.wasSuccessful() and result.testsRun > skipped else 1)
           PY
-      - name: Run unit and integration tests
-        run: python -m unittest discover -s tests -v

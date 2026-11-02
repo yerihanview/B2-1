@@ -2,13 +2,15 @@
 
 Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부다. 거래·카테고리·예산을 JSONL 세 파일로 저장하고 CSV로 가져오기/내보내기한다. 백업·월별 반복 내역·한글 테이블 정렬·저장 원자성 보너스도 필수 범위에 포함한다. 외부 패키지 설치는 필요 없다.
 
-최신 PR 검토·데모·승인 대상은 [최종 검토](docs/final-review.md), 단계별 실행 기록은 [검수 결과](docs/validation-results.md)에 기록한다. 로컬 검증, 원격 GitHub Actions, 사람의 최종 데모 승인을 구분한다. 공식 미션·평가표는 첨부 원문으로 대조했으며 사용자 요청에 따라 저장소에 포함하지 않는다.
+**제출 상태:** 사용자 승인 후 PR #1을 main에 병합했다. [제출물 점검](docs/submission-check.md), [평가 대비 설명](docs/evaluation-guide.md), [최종 검토](docs/final-review.md), [단계별 검수 기록](docs/validation-results.md)을 확인할 수 있다. 로컬 검증, 원격 GitHub Actions, 사람의 최종 데모 승인을 구분한다. 공식 미션·평가표는 첨부 원문으로 대조했으며 사용자 요청에 따라 저장소에 포함하지 않는다.
 
 ## 실행
 
-저장소 루트에서 실행한다.
+처음 받는 경우 Git으로 내려받고 저장소 루트에서 실행한다. GitHub ZIP으로 받은 경우에도 프로그램 실행에는 Git이 필요 없지만, SHA를 기록하는 개발용 smoke/benchmark 스크립트는 Git 체크아웃에서 사용한다.
 
 ```bash
+git clone https://github.com/yerihanview/B2-1.git
+cd B2-1
 python --version  # 3.10 이상
 python -m budget_app --help
 python -m budget_app --data-dir ./data category add
@@ -129,5 +131,6 @@ python scripts/benchmark.py --repeat 1
 - [구현·역할 분담 계획](docs/implementation-plan.md), [실패 처리 정책](docs/failure-policy.md), [에이전트 지침](AGENTS.md)
 - [미션 수행 전략](docs/mission-strategy.md), [학습 개념 지도](docs/learning-map.md), [데모](docs/demo.md)
 - [인수인계 검토 기록](docs/handover-review.md), [검수 결과와 증거](docs/validation-results.md)
+- [GitHub 제출 점검표](docs/submission-check.md), [평가 대비 설명과 연습 질문](docs/evaluation-guide.md)
 
 공식 미션 달성과 별도로 명세 중심 AI 개발 운영법을 연구한다. 이 개인 연구는 공식 평가항목이 아니며 불필요한 하네스·로그 수집보다 실제 기능·안전성 검수를 우선한다.

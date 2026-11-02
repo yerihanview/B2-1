@@ -1,0 +1,40 @@
+Submission source SHA: b6e36138de804ee1424553ec178249f895e58c91
+PASS: all tracked Markdown local file targets exist
+PASS: tracked files exclude runtime data, ZIP backups and uploaded original documents
+
+Interpreter: Python 3.12.14
+PASS: imported app only from fresh tracked-file export
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime --help
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime category add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime category add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime budget set --month 2024-01 --amount 10000
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime summary --month 2024-01
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime export --out out.csv --month 2024-01
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring add --day 31 --type income --category salary --amount 3000000 --memo 가상 월급
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring apply --month 2024-02
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring apply --month 2024-02
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime backup
+exit=2: python -E -m budget_app --data-dir <TEMP>/runtime add
+PASS: fresh export help/init/CRUD prerequisite/budget/CSV/recurring/ZIP/error preservation
+
+Interpreter: Python 3.10.22
+PASS: imported app only from fresh tracked-file export
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime --help
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime category add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime category add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime add
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime budget set --month 2024-01 --amount 10000
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime summary --month 2024-01
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime export --out out.csv --month 2024-01
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring add --day 31 --type income --category salary --amount 3000000 --memo 가상 월급
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring apply --month 2024-02
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime recurring apply --month 2024-02
+exit=0: python -E -m budget_app --data-dir <TEMP>/runtime backup
+exit=2: python -E -m budget_app --data-dir <TEMP>/runtime add
+PASS: fresh export help/init/CRUD prerequisite/budget/CSV/recurring/ZIP/error preservation
+
+PASS: submission artifact audit completed; no third-party install, no Git metadata or workspace-source dependency
+
+Documentation follow-up: 16 Markdown files, 77 local file targets verified including new submission and evaluation guides.
+PASS: app, tests, scripts and CI workflow unchanged from approved main b6e3613.

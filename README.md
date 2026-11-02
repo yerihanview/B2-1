@@ -2,7 +2,7 @@
 
 Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부다. 거래·카테고리·예산을 JSONL 세 파일로 저장하고 CSV로 가져오기/내보내기한다. 백업·월별 반복 내역·한글 테이블 정렬·저장 원자성 보너스도 필수 범위에 포함한다. 외부 패키지 설치는 필요 없다.
 
-구현 및 검증 현황은 [검수 결과](docs/validation-results.md)에 기록한다. 로컬 검증, 원격 GitHub Actions, 사람의 최종 데모 승인을 구분한다. 공식 미션·평가표는 첨부 원문으로 대조했으며 사용자 요청에 따라 저장소에 포함하지 않는다.
+최신 PR 검토·데모·승인 대상은 [최종 검토](docs/final-review.md), 단계별 실행 기록은 [검수 결과](docs/validation-results.md)에 기록한다. 로컬 검증, 원격 GitHub Actions, 사람의 최종 데모 승인을 구분한다. 공식 미션·평가표는 첨부 원문으로 대조했으며 사용자 요청에 따라 저장소에 포함하지 않는다.
 
 ## 실행
 
@@ -121,7 +121,7 @@ python scripts/benchmark.py --repeat 1
 
 검수와 데모는 임시 디렉터리·가상 데이터만 사용한다. benchmark는 고정 seed로 1만/10만 건과 limit 20/1000을 비교하고 list/search/add/update의 시간·최대 Python 할당 메모리를 측정한다. tracemalloc 비용이 포함되므로 일상 실행 속도와 구분한다.
 
-독립 검수는 `tests/test_acceptance_cli.py`, 개발 단위·장애 검수는 나머지 테스트 파일에 둔다. GitHub Actions는 Python 3.10에서 두 종류를 실행하며 0건·전체 스킵 성공을 차단한다. 실제 실행 결과를 확인하기 전 원격 CI 통과를 주장하지 않는다. PR 자동 병합은 하지 않는다.
+독립 검수는 `tests/test_acceptance_cli.py`와 `tests/test_bonus_acceptance.py`, 개발 단위·장애 검수는 나머지 테스트 파일에 둔다. GitHub Actions는 Python 3.10에서 두 종류를 실행하며 0건·전체 스킵 성공을 차단한다. 실제 실행 결과를 확인하기 전 원격 CI 통과를 주장하지 않는다. PR 자동 병합은 하지 않는다.
 
 ## 설계·평가·학습 자료
 

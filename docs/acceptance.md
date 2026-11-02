@@ -1,6 +1,6 @@
 # B2-1 검수 계획 및 품질 게이트 v1.0
 
-상태: 구현·로컬 자동 검수 결과는 [validation-results.md](validation-results.md) 참조. **원격 CI·사람의 최종 데모 승인은 미확인/대기**. 기준: 공식 미션, 평가항목, docs/spec.md, docs/design.md.
+상태: 구현·로컬 자동 검수 결과는 [validation-results.md](validation-results.md) 참조. **최신 원격 CI와 최종 검토는 [final-review.md](final-review.md), G2 사람의 데모·병합 승인은 대기**. 기준: 공식 미션, 평가항목, docs/spec.md, docs/design.md.
 
 ## 검수 원칙
 - 공식 평가 체크리스트의 각 항목에 테스트 ID, 증거, 설명 자료를 연결한다. 사람이 평가할 설명의 타당성과 자동 검수 결과를 혼동하지 않는다.
@@ -54,7 +54,7 @@
 1. 현재 정리 문서의 평가 요구→A01~A16 매핑 확인. 첨부 공식 원문·평가표 텍스트 대조 완료(2026-11-02); 삽입 이미지는 대조 범위 밖. 원문은 저장소에 올리지 않는다.
 2. docs/design.md ADR, docs/spec.md 입력·출력·오류 계약 확정.
 3. 외부 패키지 사용금지, 최소 3 모듈·2 클래스 조건 확인.
-4. 테스트 예제 데이터와 기대값 마련. **명세 기반 개발 준비와 공식 원문 대조 상태를 구분하며 구현 검수는 미완료**.
+4. 테스트 예제 데이터와 기대값 마련. **G0의 당시 준비 조건이다. 현재 로컬 자동 검수는 통과했으며 G2 최종 설명·데모 승인은 대기한다.**
 
 ## 구현 후 게이트 G1/G2
 - G1 자동: `python -m unittest discover -s tests -v` 전체 성공, 표준 라이브러리 외 런타임 의존성 없음, 간단한 CLI smoke 확인, 명세와 일치.
@@ -98,4 +98,4 @@
 
 독립 검증자는 위 계약에서 별도 CLI 테스트를 작성하고 개발 단위·장애 주입 테스트와 함께 최종 SHA에서 양 Python 버전 회귀를 실행한다. 원격 Actions·사람의 최종 데모/병합은 별도 승인이다.
 
-보너스 통합 실행 결과: [validation-results.md](validation-results.md)의 B01~B04 절. 기본+보너스 113개 양 Python 버전 로컬 통과, 독립 CLI 48개 포함. 원격 CI와 사람의 최종 승인은 구분한다.
+보너스 추가 당시 113개/독립 CLI 48개 기록은 validation-results.md의 B01~B04 절에 보존한다. 최종 검토 후 최신 결과는 [final-review.md](final-review.md)의 전체 117개/독립 CLI 50개를 따른다. 원격 CI와 G2 사람의 최종 승인은 구분한다.

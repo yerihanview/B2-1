@@ -5,7 +5,6 @@ import argparse
 import calendar
 from typing import Sequence
 
-from .csv_io import export_csv, import_csv
 from .decorators import user_errors
 from .errors import InputError
 from .models import Transaction, parse_amount, parse_date, parse_month, parse_name, parse_tags, validate_memo
@@ -188,10 +187,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             service.delete(args.id)
             print(f'[삭제 완료] id={args.id}')
         elif args.command == 'import':
-            count = import_csv(repository, args.source)
+            count = service.import_csv(args.source)
             print(f'[완료] imported={count}, skipped=0')
         elif args.command == 'export':
-            count = export_csv(repository, args.out, from_date=interval[0], to_date=interval[1],
+            count = service.export_csv(args.out, from_date=interval[0], to_date=interval[1],
                                overwrite=args.overwrite)
             print(f'[완료] exported={count} {args.out}')
     return 0

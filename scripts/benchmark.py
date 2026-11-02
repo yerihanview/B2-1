@@ -45,14 +45,31 @@ def worker(arguments: list[str], input_text: str) -> None:
     sys.stdin = io.StringIO(input_text)
     tracemalloc.start()
     start = time.perf_counter()
-    with contextlib.redirect_stdout(io.StringIO()):
+    captured = io.StringIO()
+    with contextlib.redirect_stdout(captured):
         code = main(arguments)
     elapsed = time.perf_counter() - start
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    print(json.dumps(dict(seconds=round(elapsed, 6), peak_bytes=peak, exit_code=code)))
     if code:
         raise SystemExit(code)
+    command = arguments[2]
+    output_rows = None
+    if command in ('list', 'search'):
+        output_rows = sum(line.startswith('TX-') for line in captured.getvalue().splitlines())
+        assert output_rows == int(arguments[arguments.index('--limit') + 1])
+    else:
+        target = Path(arguments[1]) / 'transactions.jsonl'
+        with target.open(encoding='utf-8') as stream:
+            if command == 'update':
+                assert json.loads(next(stream))['memo'] == '가상 수정'
+            else:
+                last = None
+                for line in stream:
+                    last = line
+                assert json.loads(last)['memo'] == '가상 추가'
+    print(json.dumps(dict(seconds=round(elapsed, 6), peak_bytes=peak, exit_code=code,
+                          output_rows=output_rows, functional_check=True)))
 
 
 def main() -> None:

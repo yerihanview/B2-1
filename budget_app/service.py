@@ -6,6 +6,7 @@ import heapq
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP, localcontext
 from itertools import chain
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -158,3 +159,19 @@ class Service:
             "count": count, "budget": budget, "usage": usage,
             "exceeded": budget is not None and expense > budget,
         }
+
+    def import_csv(self, source: str | Path) -> int:
+        """Coordinate validated CSV ingestion inside the repository session."""
+        from .csv_io import import_csv
+        return import_csv(self.repo, source)
+
+    def export_csv(self, destination: str | Path, *, from_date: str,
+                   to_date: str, overwrite: bool = False) -> int:
+        """Coordinate CSV conversion and repository-owned atomic publication."""
+        from .csv_io import export_csv
+        start = parse_date(from_date).isoformat()
+        end = parse_date(to_date).isoformat()
+        if start > end:
+            raise InputError("시작 날짜가 종료 날짜보다 늦습니다.")
+        return export_csv(self.repo, destination, from_date=start, to_date=end,
+                          overwrite=overwrite)

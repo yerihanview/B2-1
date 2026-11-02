@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import calendar
+from decimal import Decimal
 from typing import Sequence
 
 from .decorators import user_errors
@@ -176,14 +177,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = service.summary(args.month, args.top)
             if not result['count']:
                 print(f'[데이터 없음] {args.month}')
-            print(f"총 수입: {result['income']}원\n총 지출: {result['expense']}원\n잔액: {result['balance']}원")
+            print(f"총 수입: {Decimal(result['income']):f}원\n총 지출: {Decimal(result['expense']):f}원\n잔액: {Decimal(result['balance']):f}원")
             if result['budget'] is not None:
-                print(f"예산: {result['budget']}원 (사용률 {result['usage']}%)")
+                print(f"예산: {Decimal(result['budget']):f}원 (사용률 {result['usage']}%)")
                 if result['exceeded']:
                     print('[경고] 예산 초과')
             print(f'지출 TOP {args.top}')
             for index, (name, amount) in enumerate(result['top'], 1):
-                print(f'{index}) {name} {amount}원')
+                print(f'{index}) {name} {Decimal(amount):f}원')
         elif args.command == 'budget':
             service.set_budget(args.month, args.amount)
             print(f'[저장 완료] {args.month} 예산 {args.amount}원')

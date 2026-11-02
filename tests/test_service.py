@@ -1,6 +1,13 @@
 """Domain behavior checked without filesystem implementation assumptions."""
 
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
+from pathlib import Path
+import tempfile
+
+from budget_app.cli import main
+from budget_app.repository import Repository
 from typing import get_type_hints
 from unittest.mock import patch
 from uuid import UUID
@@ -184,6 +191,49 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(used, {generated})
             with self.assertRaises(StorageError):
                 allocate_id(used)
+
+    def test_large_summary_totals_preserve_exact_values_and_budget_usage(self):
+        amount = '9' * 4300
+        first = self.add(amount=amount)
+        self.add(amount=amount)
+        expected = first.amount * 2
+        result = self.service.summary('2024-01')
+        self.assertEqual(result['expense'], expected)
+        self.service.set_budget('2024-01', amount)
+        result = self.service.summary('2024-01')
+        self.assertEqual(result['expense'], expected)
+        self.assertEqual(result['usage'], '200.0')
+
+    def test_large_cli_summary_outputs_exact_totals_and_top_without_digit_limit(self):
+        amount = '9' * 4300
+        doubled = '1' + '9' * 4299 + '8'
+        quadrupled = '3' + '9' * 4299 + '6'
+        with tempfile.TemporaryDirectory() as root:
+            repo = Repository(Path(root) / 'data')
+            with repo.session():
+                service = Service(repo)
+                service.add_category('food')
+                for kind, count in [('expense', 2), ('income', 4)]:
+                    for _ in range(count):
+                        service.add(date='2024-01-15', type=kind, category='food', amount=amount)
+            original = repo.path('transactions.jsonl').read_bytes()
+            for budget in (False, True):
+                with self.subTest(budget=budget):
+                    if budget:
+                        with repo.session():
+                            Service(repo).set_budget('2024-01', amount)
+                    output = StringIO()
+                    with redirect_stdout(output):
+                        result = main(['--data-dir', str(repo.directory), 'summary', '--month', '2024-01'])
+                    self.assertEqual(result, 0)
+                    self.assertIn('총 수입: ' + quadrupled + '원', output.getvalue())
+                    self.assertIn('총 지출: ' + doubled + '원', output.getvalue())
+                    self.assertIn('잔액: ' + doubled + '원', output.getvalue())
+                    self.assertIn('1) food ' + doubled + '원', output.getvalue())
+                    if budget:
+                        self.assertIn('사용률 200.0%', output.getvalue())
+                    self.assertEqual(repo.path('transactions.jsonl').read_bytes(), original)
+                    self.assertFalse(repo.lock_path.exists())
 
 
 if __name__ == "__main__":

@@ -214,7 +214,7 @@ class Service:
         usage = None
         if budget is not None:
             with localcontext() as context:
-                context.prec = max(len(str(expense)), len(str(budget))) + 20
+                context.prec = max(Decimal(expense).adjusted(), Decimal(budget).adjusted()) + 21
                 usage = str((Decimal(expense) * 100 / Decimal(budget)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
         return {
             "income": income, "expense": expense, "balance": income - expense,

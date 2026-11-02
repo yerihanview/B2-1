@@ -211,6 +211,36 @@ class IndependentCLIAcceptance(unittest.TestCase):
         for value in ('0', '101'):
             self.cli('summary', '--month', '2024-01', '--top', value, expected=2)
 
+    def _assert_large_amount_summary(self, *, with_budget: bool) -> None:
+        # The contract has no monetary maximum. Each input is accepted at the
+        # CPython 3.12 default conversion boundary; their sum crosses it.
+        # Build expected output as text so this independent oracle does not
+        # reproduce the implementation's int-to-string conversion defect.
+        self.seed()
+        amount_text = '9' * 4300
+        total_text = '1' + '9' * 4299 + '8'
+        for memo in ('first large expense', 'second large expense'):
+            self.cli('add', stdin='2024-01-15\nexpense\nfood\n' +
+                     amount_text + '\n' + memo + '\n\n')
+        if with_budget:
+            self.cli('budget', 'set', '--month', '2024-01', '--amount', '1')
+        before = self.snapshot()
+        output = self.cli('summary', '--month', '2024-01').stdout
+        self.assertIn('총 수입: 0원', output)
+        self.assertIn('총 지출: ' + total_text + '원', output)
+        self.assertIn('잔액: -' + total_text + '원', output)
+        if with_budget:
+            self.assertIn(total_text + '00.0%', output)
+            self.assertIn('초과', output)
+        self.assertEqual(self.snapshot(), before)
+        self.assert_clean()
+
+    def test_T04_large_accepted_amounts_summary_without_budget(self) -> None:
+        self._assert_large_amount_summary(with_budget=False)
+
+    def test_T12_large_accepted_amounts_summary_with_budget(self) -> None:
+        self._assert_large_amount_summary(with_budget=True)
+
     def test_T04_category_top_ties_are_alphabetical_and_income_excluded(self) -> None:
         self.seed([self.transaction(category='transport', amount=10),
                    self.transaction(category='food', amount=10),

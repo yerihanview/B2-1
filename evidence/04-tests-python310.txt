@@ -1,0 +1,81 @@
+SHA: 823779645ec28ed202d06f34c20c0737b83fcf9d
+Python: 3.10.22 (main, Oct  3 2026, 01:32:06) [Clang 22.1.3 ]
+Command: python -m unittest discover -s tests -v
+test_T01_add_persistence_uuid_tags_and_memo (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T01_invalid_interactive_values_preserve_files (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T02_default_limit_twenty (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T02_latest_sort_ties_and_limit (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T03_search_and_boundaries_case_and_tag (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T04_category_top_ties_are_alphabetical_and_income_excluded (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T04_summary_budget_rates_and_tie_order (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T06_update_keeps_id_position_and_clears_optional_fields (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T07_delete_without_prompt_and_absent_id (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T08_export_filters_file_order_schema_and_overwrite (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T08_export_zero_and_inclusive_range (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T09_import_unicode_quoting_nonidempotence (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T09_valid_tags_are_not_limited_by_csv_default_field_size (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T10_initialization_and_category_prerequisite (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T11_category_sort_case_duplicate_referenced_and_unused (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T12_budget_only_month_and_half_up (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T19_invalid_csv_rows_rollback_and_physical_line_number (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T21_EOF_releases_owned_lock (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T21_all_help_and_parser_errors_do_not_create_data (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T21_help_ignores_corrupt_store_and_existing_lock (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T22_corrupt_and_missing_does_not_initialize_missing_file (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T22_corruption_in_any_file_is_not_repaired (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T22_filter_does_not_hide_late_corruption (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T22_optional_fields_may_be_omitted (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T23_live_interactive_process_holds_lock_until_interrupted (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T23_stale_lock_is_preserved_and_reads_also_fail (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T24_export_protects_internal_files_and_aliases (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T25_csv_error_variants_preserve_all_files (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T25_first_twenty_validation_errors_only (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T25_header_only_import_is_noop (test_acceptance_cli.IndependentCLIAcceptance) ... ok
+test_T09_import_collision_exhaustion_preserves_original (test_csv_io.CSVTests) ... ok
+test_T09_import_ids_avoid_existing_and_within_batch_collisions (test_csv_io.CSVTests) ... ok
+test_T24_race_created_destination_is_never_clobbered (test_csv_io.CSVTests) ... ok
+test_T25_invalid_quote_rolls_back_and_header_only_no_replace (test_csv_io.CSVTests) ... ok
+test_T25_reader_field_limit_is_restored (test_csv_io.CSVTests) ... ok
+test_T26_export_replace_failure_keeps_existing_csv (test_csv_io.CSVTests) ... ok
+test_T26_import_replace_failure_keeps_original_and_cleans_stage (test_csv_io.CSVTests) ... ok
+test_amount_rejects_bool_zero_float_sign_and_whitespace (test_models.ModelTests) ... ok
+test_dates_reject_noncanonical_and_invalid_calendar (test_models.ModelTests) ... ok
+test_memo_length_and_utf8 (test_models.ModelTests) ... ok
+test_model_public_type_hints_resolve (test_models.ModelTests) ... ok
+test_model_roundtrip_and_frozen_dataclass (test_models.ModelTests) ... ok
+test_names_and_tags_normalize_input (test_models.ModelTests) ... ok
+test_optional_fields_default (test_models.ModelTests) ... ok
+test_stored_fields_are_strict_and_never_normalized (test_models.ModelTests) ... ok
+test_S_application_imports_only_standard_library_or_relative_modules (test_repository.RepositoryTests) ... ok
+test_S_public_apis_have_runtime_resolvable_type_hints (test_repository.RepositoryTests) ... ok
+test_T16_replace_failure_preserves_each_mutation_target (test_repository.RepositoryTests) ... ok
+test_T17_repository_is_a_real_consumable_generator (test_repository.RepositoryTests) ... ok
+test_T18_decorator_wraps_and_storage_errors_have_no_traceback (test_repository.RepositoryTests) ... ok
+test_T22_duplicate_object_keys_extra_fields_and_nonobjects (test_repository.RepositoryTests) ... ok
+test_T22_excessively_nested_json_is_storage_error_without_traceback (test_repository.RepositoryTests) ... ok
+test_T23_foreign_replacement_lock_not_deleted (test_repository.RepositoryTests) ... ok
+test_T24_export_symlink_loop_is_storage_error (test_repository.RepositoryTests) ... ok
+test_T26_lock_cleanup_after_commit_reports_change (test_repository.RepositoryTests) ... ok
+test_T26_post_exclusive_link_cleanup_failure_is_committed (test_repository.RepositoryTests) ... ok
+test_T26_post_replace_fsync_reports_committed_change (test_repository.RepositoryTests) ... ok
+test_T26_writer_flush_fsync_failures_leave_original (test_repository.RepositoryTests) ... ok
+test_add_regenerates_duplicate_uuid (test_service.ServiceTests) ... ok
+test_add_validates_before_writing (test_service.ServiceTests) ... ok
+test_allocate_id_reserves_new_values_in_shared_set (test_service.ServiceTests) ... ok
+test_delete_missing_and_other_records_preserved (test_service.ServiceTests) ... ok
+test_empty_month_with_budget_and_round_half_up (test_service.ServiceTests) ... ok
+test_failed_writes_do_not_change_state (test_service.ServiceTests) ... ok
+test_latest_date_then_reverse_file_position (test_service.ServiceTests) ... ok
+test_public_type_hints_resolve (test_service.ServiceTests) ... ok
+test_search_and_boundaries_and_exact_tag (test_service.ServiceTests) ... ok
+test_summary_only_expense_top_tie_and_budget (test_service.ServiceTests) ... ok
+test_update_keeps_position_and_id_and_clears_optional_fields (test_service.ServiceTests) ... ok
+test_used_category_cannot_be_removed_and_count_reported (test_service.ServiceTests) ... ok
+test_uuid_exhaustion_preserves_transactions (test_service.ServiceTests) ... ok
+
+----------------------------------------------------------------------
+Ran 71 tests in 8.583s
+
+OK
+
+Exit: 0

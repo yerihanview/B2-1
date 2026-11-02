@@ -1,0 +1,37 @@
+Final review source SHA: 0505fbf218b9605e95ad7657d9978e4ca79f7afe
+All financial data in these checks is synthetic.
+
+Python 3.12
+Command: python -m unittest discover -s tests -v
+----------------------------------------------------------------------
+Ran 117 tests in 14.489s
+
+OK
+Exit: 0
+
+Python 3.10
+Command: Python 3.10.22: python -m unittest discover -s tests -v
+----------------------------------------------------------------------
+Ran 117 tests in 15.175s
+
+OK
+Exit: 0
+
+Core CLI
+PASS: mixed CSV rollback preserves original SHA-256
+PERSISTENCE: budgets.jsonl records= 1
+PERSISTENCE: categories.jsonl records= 2
+PERSISTENCE: transactions.jsonl records= 3
+PASS: CLI flow, CSV, errors, rollback, three-file persistence across fresh processes
+Exit: 0
+
+Bonus CLI
+PASS: leap-month clipping and repeat-apply idempotence
+PASS: backup original bytes, SHA-256 manifest, no locks/previous archives
+PASS: restored CLI state and rule removal preserves past transactions
+PASS: repeated backup preserves prior archive
+Exit: 0
+
+New regression: accepted 4300-digit expenses x2, exact 4301-digit total and negative balance, with and without budget.
+Correction attempts for this defect: 1; independent expected values unchanged.
+Global integer string conversion limit and Decimal context were not disabled or changed globally.

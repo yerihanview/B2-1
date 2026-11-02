@@ -1,0 +1,63 @@
+Python: 3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]
+SHA: 5af81cf787d57a25769d18f1a8147b80e85e0eb7
+Synthetic data only; <TEMP> paths are ephemeral.
+$ python -m budget_app --data-dir <TEMP>/data category add
+stdin: 'salary\n'
+exit: 0
+카테고리명: [저장 완료] category=salary
+$ python -m budget_app --data-dir <TEMP>/data category add
+stdin: 'food\n'
+exit: 0
+카테고리명: [저장 완료] category=food
+$ python -m budget_app --data-dir <TEMP>/data recurring add --day 31 --type income --category salary --amount 3000000 --memo 가상 월급 --tags monthly
+exit: 0
+[저장 완료] id=RR-6e23414a6a4e421f8fec5bda1fb43705
+$ python -m budget_app --data-dir <TEMP>/data recurring list
+exit: 0
+RR-6e23414a6a4e421f8fec5bda1fb43705 | 31 | income | salary | 3000000 | 가상 월급 | monthly
+$ python -m budget_app --data-dir <TEMP>/data recurring apply --month 2024-02
+exit: 0
+[완료] generated=1, skipped=0
+$ python -m budget_app --data-dir <TEMP>/data recurring apply --month 2024-02
+exit: 0
+[완료] generated=0, skipped=1
+PASS: leap-month clipping and repeat-apply idempotence
+$ python -m budget_app --data-dir <TEMP>/data add
+stdin: '2024-02-29\nexpense\nfood\n15000\n한글 점심\nmeal\n'
+exit: 0
+날짜(YYYY-MM-DD): 타입(income/expense): 카테고리: 금액(양수 정수): 메모(선택): 태그(쉼표 구분): [저장 완료] id=TX-3d67fabf431045f9ac3a6726f5f03a9a
+$ python -m budget_app --data-dir <TEMP>/data list
+exit: 0
+TX-3d67fabf431045f9ac3a6726f5f03a9a | 2024-02-29 | expense | food   |   15000 | 한글 점심
+TX-1cb6673f8f124e3ca380ead10f8016c3 | 2024-02-29 | income  | salary | 3000000 | 가상 월급
+$ python -m budget_app --data-dir <TEMP>/data search --from 2024-02-01 --to 2024-02-29
+exit: 0
+TX-3d67fabf431045f9ac3a6726f5f03a9a | 2024-02-29 | expense | food   |   15000 | 한글 점심
+TX-1cb6673f8f124e3ca380ead10f8016c3 | 2024-02-29 | income  | salary | 3000000 | 가상 월급
+$ python -m budget_app --data-dir <TEMP>/data backup
+exit: 0
+[백업 완료] <TEMP>/data/backups/backup-20261102T015225551906Z-00e9ce6a7f564c94a2b4230a5dacff81.zip
+PASS: backup original bytes, SHA-256 manifest, no locks/previous archives
+$ python -m budget_app --data-dir <TEMP>/restored recurring list
+exit: 0
+RR-6e23414a6a4e421f8fec5bda1fb43705 | 31 | income | salary | 3000000 | 가상 월급 | monthly
+$ python -m budget_app --data-dir <TEMP>/restored list
+exit: 0
+TX-3d67fabf431045f9ac3a6726f5f03a9a | 2024-02-29 | expense | food   |   15000 | 한글 점심
+TX-1cb6673f8f124e3ca380ead10f8016c3 | 2024-02-29 | income  | salary | 3000000 | 가상 월급
+$ python -m budget_app --data-dir <TEMP>/restored recurring apply --month 2024-02
+exit: 0
+[완료] generated=0, skipped=1
+$ python -m budget_app --data-dir <TEMP>/data recurring remove --id RR-6e23414a6a4e421f8fec5bda1fb43705
+exit: 0
+[삭제 완료] id=RR-6e23414a6a4e421f8fec5bda1fb43705
+$ python -m budget_app --data-dir <TEMP>/data list
+exit: 0
+TX-3d67fabf431045f9ac3a6726f5f03a9a | 2024-02-29 | expense | food   |   15000 | 한글 점심
+TX-1cb6673f8f124e3ca380ead10f8016c3 | 2024-02-29 | income  | salary | 3000000 | 가상 월급
+PASS: restored CLI state and rule removal preserves past transactions
+$ python -m budget_app --data-dir <TEMP>/data backup
+exit: 0
+[백업 완료] <TEMP>/data/backups/backup-20261102T015225938992Z-f8329598ba78427bbdb4f37ac7ceb264.zip
+PASS: repeated backup preserves prior archive
+B04 atomic failure boundaries: see full test logs for injected failure assertions.

@@ -1,0 +1,160 @@
+"""Budget application rules; the repository is supplied through the constructor."""
+
+from __future__ import annotations
+
+import heapq
+from collections import defaultdict
+from decimal import Decimal, ROUND_HALF_UP, localcontext
+from itertools import chain
+from typing import Any
+from uuid import uuid4
+
+from .errors import InputError, StorageError
+from .models import Transaction, parse_amount, parse_date, parse_month, parse_name
+from .repository import Repository
+
+
+def allocate_id(used: set[str]) -> str:
+    """Allocate a UUID absent from existing and staged transactions."""
+    for _ in range(10):
+        identifier = "TX-" + uuid4().hex
+        if identifier not in used:
+            used.add(identifier)
+            return identifier
+    raise StorageError(
+        "거래 id 생성이 반복 충돌했습니다. 전체 미반영.",
+        "기존 데이터를 보존하고 UUID 생성 환경을 확인하세요.",
+    )
+
+
+class Service:
+    """Domain operations for a repository already locked and validated by its session."""
+
+    def __init__(self, repo: Repository) -> None:
+        self.repo = repo
+
+    def _registered(self, name: str) -> str:
+        normalized = parse_name(name)
+        if normalized not in self.repo.categories:
+            raise InputError(f"등록되지 않은 카테고리입니다: {normalized}", "category add로 먼저 등록하세요.")
+        return normalized
+
+    def add(self, **fields: Any) -> Transaction:
+        """Validate a whole input before requesting one atomic transaction rewrite."""
+        if fields.keys() - {"date", "type", "category", "amount", "memo", "tags"}:
+            raise InputError("추가할 거래에 미정의 필드가 있습니다.")
+        used = {row.id for row in self.repo.iter_transactions()}
+        record = {"id": allocate_id(used), **fields}
+        record["category"] = self._registered(fields.get("category", ""))
+        transaction = Transaction.from_dict(record)
+        self.repo.write_transactions(chain(self.repo.iter_transactions(), (transaction,)))
+        return transaction
+
+    def update(self, id: str, **fields: Any) -> Transaction:
+        """Keep ID and original file position when updating specified fields."""
+        allowed = {"date", "type", "category", "amount", "memo", "tags"}
+        if not fields or fields.keys() - allowed:
+            raise InputError("변경할 필드를 한 개 이상 지정해야 합니다.")
+        original = next((row for row in self.repo.iter_transactions() if row.id == id), None)
+        if original is None:
+            raise InputError(f"없는 거래 id입니다: {id}", "list로 거래 id를 확인하세요.")
+        merged = original.to_dict()
+        merged.update(fields)
+        merged["category"] = self._registered(merged["category"])
+        updated = Transaction.from_dict(merged)
+        self.repo.write_transactions(updated if row.id == id else row for row in self.repo.iter_transactions())
+        return updated
+
+    def delete(self, id: str) -> None:
+        """Delete an existing ID without changing the other rows."""
+        if not any(row.id == id for row in self.repo.iter_transactions()):
+            raise InputError(f"없는 거래 id입니다: {id}", "list로 거래 id를 확인하세요.")
+        self.repo.write_transactions(row for row in self.repo.iter_transactions() if row.id != id)
+
+    def add_category(self, name: str) -> str:
+        """Add a unique, normalized category."""
+        name = parse_name(name)
+        if name in self.repo.categories:
+            raise InputError(f"이미 있는 카테고리입니다: {name}")
+        categories = self.repo.categories | {name}
+        self.repo.write_categories(sorted(categories))
+        self.repo.categories = categories
+        return name
+
+    def remove_category(self, name: str) -> None:
+        """Reject removal while any transaction references the category."""
+        name = self._registered(name)
+        count = sum(1 for row in self.repo.iter_transactions() if row.category == name)
+        if count:
+            raise InputError(f"사용 중인 카테고리입니다: {name} (거래 {count}건)", "해당 거래를 수정하거나 삭제한 후 다시 시도하세요.")
+        categories = self.repo.categories - {name}
+        self.repo.write_categories(sorted(categories))
+        self.repo.categories = categories
+
+    def set_budget(self, month: str, amount: str | int) -> None:
+        """Upsert a monthly positive-integer budget."""
+        month = parse_month(month)
+        budgets = dict(self.repo.budgets)
+        budgets[month] = parse_amount(amount)
+        self.repo.write_budgets(budgets)
+        self.repo.budgets = budgets
+
+    def select(
+        self, limit: int = 20, from_date: str | None = None,
+        to_date: str | None = None, category: str | None = None,
+        type: str | None = None, q: str | None = None, tag: str | None = None,
+    ) -> list[Transaction]:
+        """Select latest K matches with a bounded heap, never a whole-file list."""
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 1000:
+            raise InputError("limit은 1~1000이어야 합니다.")
+        start = parse_date(from_date) if from_date is not None else None
+        end = parse_date(to_date) if to_date is not None else None
+        if start is not None and end is not None and start > end:
+            raise InputError("시작 날짜가 종료 날짜보다 늦습니다.")
+        category = parse_name(category) if category is not None else None
+        tag = parse_name(tag, tag=True) if tag is not None else None
+        if type is not None and type not in ("income", "expense"):
+            raise InputError("타입은 income 또는 expense여야 합니다.")
+        heap: list[tuple[Any, int, Transaction]] = []
+        for position, row in enumerate(self.repo.iter_transactions()):
+            if start is not None and row.date < start or end is not None and row.date > end:
+                continue
+            if category is not None and row.category != category or type is not None and row.type != type:
+                continue
+            if q is not None and q not in row.memo or tag is not None and tag not in row.tags:
+                continue
+            item = (row.date, position, row)
+            if len(heap) < limit:
+                heapq.heappush(heap, item)
+            elif item[:2] > heap[0][:2]:
+                heapq.heapreplace(heap, item)
+        return [item[2] for item in sorted(heap, reverse=True)]
+
+    def summary(self, month: str, top: int = 3) -> dict[str, Any]:
+        """Aggregate the whole month and compute one-place decimal budget usage."""
+        month = parse_month(month)
+        if isinstance(top, bool) or not isinstance(top, int) or not 1 <= top <= 100:
+            raise InputError("top은 1~100이어야 합니다.")
+        income = expense = count = 0
+        categories: dict[str, int] = defaultdict(int)
+        for row in self.repo.iter_transactions():
+            if row.date.isoformat()[:7] != month:
+                continue
+            count += 1
+            if row.type == "income":
+                income += row.amount
+            else:
+                expense += row.amount
+                categories[row.category] += row.amount
+        budget = self.repo.budgets.get(month)
+        usage = None
+        if budget is not None:
+            with localcontext() as context:
+                context.prec = max(len(str(expense)), len(str(budget))) + 20
+                usage = str((Decimal(expense) * 100 / Decimal(budget)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
+        return {
+            "income": income, "expense": expense, "balance": income - expense,
+            "top": sorted(categories.items(), key=lambda item: (-item[1], item[0]))[:top],
+            "count": count, "budget": budget, "usage": usage,
+            "exceeded": budget is not None and expense > budget,
+        }

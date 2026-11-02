@@ -1,0 +1,7 @@
+{"python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]", "platform": "Linux-6.18.57-x86_64-with-glibc2.41", "sha": "5af81cf787d57a25769d18f1a8147b80e85e0eb7", "seed": 20261102, "repeat": 1, "measurement": "CLI main after import; tracemalloc enabled; synthetic data; fixture generation excluded; wall time includes fsync"}
+{"seconds": 1.223759, "peak_bytes": 1573671, "exit_code": 0, "output_rows": 20, "functional_check": true, "N": 10000, "K": 20, "command": "list", "iteration": 1}
+{"seconds": 11.101928, "peak_bytes": 12545043, "exit_code": 0, "output_rows": 20, "functional_check": true, "N": 100000, "K": 20, "command": "list", "iteration": 1}
+{"seconds": 11.88309, "peak_bytes": 12545750, "exit_code": 0, "output_rows": 1000, "functional_check": true, "N": 100000, "K": 1000, "command": "list", "iteration": 1}
+{"seconds": 11.783581, "peak_bytes": 12546983, "exit_code": 0, "output_rows": 20, "functional_check": true, "N": 100000, "K": 20, "command": "search", "iteration": 1}
+{"seconds": 19.756843, "peak_bytes": 12547670, "exit_code": 0, "output_rows": null, "functional_check": true, "N": 100000, "K": null, "command": "add", "iteration": 1}
+{"seconds": 14.804923, "peak_bytes": 12544782, "exit_code": 0, "output_rows": null, "functional_check": true, "N": 100000, "K": null, "command": "update", "iteration": 1}

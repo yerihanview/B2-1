@@ -29,3 +29,5 @@
 - 타입 힌트의 한계: 런타임 검증을 대신하지 않는다. 실제 get_type_hints 검수는 개발 테스트, 동작 계약 검수는 독립 CLI 테스트에서 확인한다.
 
 이 위치의 코드를 따라 설명하고, validation-results.md의 실행 근거와 연결한다. AI의 자동 실행은 사람의 설명 가능성·최종 데모 승인을 대신하지 않는다.
+
+보너스 학습 근거: backup.create_backup의 잠금 아래 스트리밍 ZIP·SHA-256, models.RecurringRule과 Transaction 출처 쌍, Service의 달력 보정·원자적 월 생성, formatting의 Unicode 폭·출력 이스케이프를 코드와 보너스 검수 로그로 설명한다.

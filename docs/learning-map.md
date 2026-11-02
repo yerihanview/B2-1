@@ -17,3 +17,15 @@
 - 단순 Python 문법 암기, 전 함수 줄별 해석, 코드 수동 변경은 필수 활동으로 두지 않음.
 - 공식 평가의 설명 항목은 이해를 확인하는 기준. AI 하네스는 별도의 개인 연구 성과.
 - 이해가 불충분한 주제만 확장 학습하고, 정해진 주제 밖으로 무한 확장하지 않는다.
+
+## 구현에서 확인할 위치
+
+- 진입점·argparse·대화형 입력·출력: `budget_app/__main__.py`, `cli.py`.
+- 불변 dataclass와 실제 입력/저장 모델 검증: `models.Transaction`, `from_dict`.
+- 생성자 DI와 bounded heap, 요약의 정수 금액/십진 반올림: `service.Service`.
+- 실제 yield와 전체 무결성 검증, session 잠금, publication 전후 실패: `repository.Repository`.
+- CSV strict reader·디스크 staging·전건 롤백·고정 스키마: `csv_io.py`.
+- 실제 적용된 `@user_errors`, `functools.wraps`, 오류 코드: `decorators.py`, `errors.py`, `cli.main`.
+- 타입 힌트의 한계: 런타임 검증을 대신하지 않는다. 실제 get_type_hints 검수는 개발 테스트, 동작 계약 검수는 독립 CLI 테스트에서 확인한다.
+
+이 위치의 코드를 따라 설명하고, validation-results.md의 실행 근거와 연결한다. AI의 자동 실행은 사람의 설명 가능성·최종 데모 승인을 대신하지 않는다.

@@ -1,0 +1,92 @@
+Python: 3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]
+SHA: 823779645ec28ed202d06f34c20c0737b83fcf9d
+Synthetic data only; <TEMP> paths are ephemeral.
+$ python -m budget_app --data-dir <TEMP>/data category add
+stdin: 'food\n'
+exit: 0
+카테고리명: [저장 완료] category=food
+$ python -m budget_app --data-dir <TEMP>/data category add
+stdin: 'salary\n'
+exit: 0
+카테고리명: [저장 완료] category=salary
+$ python -m budget_app --data-dir <TEMP>/data category add
+stdin: 'unused\n'
+exit: 0
+카테고리명: [저장 완료] category=unused
+$ python -m budget_app --data-dir <TEMP>/data category list
+exit: 0
+- food
+- salary
+- unused
+$ python -m budget_app --data-dir <TEMP>/data category remove
+stdin: 'unused\n'
+exit: 0
+카테고리명: [삭제 완료] category=unused
+$ python -m budget_app --data-dir <TEMP>/data add
+stdin: '2024-01-01\nincome\nsalary\n100000\n가상 수입\n\n'
+exit: 0
+날짜(YYYY-MM-DD): 타입(income/expense): 카테고리: 금액(양수 정수): 메모(선택): 태그(쉼표 구분): [저장 완료] id=TX-68cd034a557640c9a01c2933b9df6037
+$ python -m budget_app --data-dir <TEMP>/data add
+stdin: '2024-01-15\nexpense\nfood\n15000\n점심\nmeal,weekday\n'
+exit: 0
+날짜(YYYY-MM-DD): 타입(income/expense): 카테고리: 금액(양수 정수): 메모(선택): 태그(쉼표 구분): [저장 완료] id=TX-8c46b8262b5c4034997888c96efa3f91
+$ python -m budget_app --data-dir <TEMP>/data list --limit 20
+exit: 0
+TX-8c46b8262b5c4034997888c96efa3f91 | 2024-01-15 | expense | food | 15000 | 점심
+TX-68cd034a557640c9a01c2933b9df6037 | 2024-01-01 | income | salary | 100000 | 가상 수입
+$ python -m budget_app --data-dir <TEMP>/data search --from 2024-01-15 --to 2024-01-15 --tag meal
+exit: 0
+TX-8c46b8262b5c4034997888c96efa3f91 | 2024-01-15 | expense | food | 15000 | 점심
+$ python -m budget_app --data-dir <TEMP>/data budget set --month 2024-01 --amount 10000
+exit: 0
+[저장 완료] 2024-01 예산 10000원
+$ python -m budget_app --data-dir <TEMP>/data summary --month 2024-01
+exit: 0
+총 수입: 100000원
+총 지출: 15000원
+잔액: 85000원
+예산: 10000원 (사용률 150.0%)
+[경고] 예산 초과
+지출 TOP 3
+1) food 15000원
+$ python -m budget_app --data-dir <TEMP>/data update --id TX-8c46b8262b5c4034997888c96efa3f91 --memo 수정된 가상 점심 --tags 
+exit: 0
+[수정 완료] id=TX-8c46b8262b5c4034997888c96efa3f91
+$ python -m budget_app --data-dir <TEMP>/data export --out <TEMP>/export.csv --month 2024-01
+exit: 0
+[완료] exported=2 <TEMP>/export.csv
+$ python -m budget_app --data-dir <TEMP>/data import --from <TEMP>/export.csv
+exit: 0
+[완료] imported=2, skipped=0
+$ python -m budget_app --data-dir <TEMP>/data import --from <TEMP>/broken.csv
+exit: 2
+stderr: [오류] CSV 전체 미반영
+3행: 금액은 공백 없는 양의 십진 정수여야 합니다.
+[힌트] 오류 행을 수정한 뒤 다시 가져오세요.
+PASS: mixed CSV rollback preserves original SHA-256
+$ python -m budget_app --data-dir <TEMP>/data category remove
+stdin: 'food\n'
+exit: 2
+카테고리명:
+stderr: [오류] 사용 중인 카테고리입니다: food (거래 2건)
+[힌트] 해당 거래를 수정하거나 삭제한 후 다시 시도하세요.
+$ python -m budget_app --data-dir <TEMP>/data delete --id TX-8c46b8262b5c4034997888c96efa3f91
+exit: 0
+[삭제 완료] id=TX-8c46b8262b5c4034997888c96efa3f91
+$ python -m budget_app --data-dir <TEMP>/data delete --id TX-8c46b8262b5c4034997888c96efa3f91
+exit: 2
+stderr: [오류] 없는 거래 id입니다: TX-8c46b8262b5c4034997888c96efa3f91
+[힌트] list로 거래 id를 확인하세요.
+PERSISTENCE: budgets.jsonl records= 1
+PERSISTENCE: categories.jsonl records= 2
+PERSISTENCE: transactions.jsonl records= 3
+$ python -m budget_app --data-dir <TEMP>/data summary --month 2024-01
+exit: 0
+총 수입: 200000원
+총 지출: 15000원
+잔액: 185000원
+예산: 10000원 (사용률 150.0%)
+[경고] 예산 초과
+지출 TOP 3
+1) food 15000원
+PASS: CLI flow, CSV, errors, rollback, three-file persistence across fresh processes

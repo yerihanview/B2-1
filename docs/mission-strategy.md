@@ -98,4 +98,4 @@
 - CLI는 이중 하이픈(`--`) 채택. 원문 기능 요구사항과 예시를 우선하고, 제약사항의 단일 하이픈 표기 충돌은 ADR-12로 보존.
 - 최종 문서 체계: [design.md](design.md), [spec.md](spec.md), [acceptance.md](acceptance.md), [demo.md](demo.md), [learning-map.md](learning-map.md), [implementation-plan.md](implementation-plan.md), 루트 [AGENTS.md](../AGENTS.md).
 
-**상태 구분:** 설계와 검수 기준 문서 작성은 완료. 실제 코드 구현, 테스트, 성능 측정, 데모 수행과 최종 승인은 아직 진행하지 않았다.
+**당시 상태(설계 확정 시점):** 설계와 검수 기준 문서 작성 완료, 코드·테스트·측정·데모는 미실행이었다. 이후 구현·자동 검수 결과와 남은 사람 승인은 [validation-results.md](validation-results.md)에 기록한다.

@@ -1,6 +1,6 @@
 # B2-1 구현·검증 운영 계획 v1.0
 
-상태: 실행 전. 상세 명세는 docs/spec.md, 하네스 지침은 AGENTS.md.
+상태: 실행 계획 및 운영 계약. 실제 실행 결과는 [validation-results.md](validation-results.md) 참조. 상세 명세는 docs/spec.md, 하네스 지침은 AGENTS.md.
 
 ## 작업 단위
 1. 프로젝트 골격, dataclass, 오류 클래스, CLI 도움말. 검수 S01/S02/S04 및 T15 기반.

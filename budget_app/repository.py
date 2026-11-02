@@ -7,13 +7,14 @@ import json
 import os
 from pathlib import Path
 import tempfile
-from typing import Callable, Iterable, Iterator, Mapping, TextIO
+from typing import Any, BinaryIO, Callable, Iterable, Iterator, Mapping, TextIO
 
 from .errors import DurabilityError, InputError, LockError, StorageError
-from .models import Transaction, parse_amount, parse_month, parse_name
+from .models import RecurringRule, Transaction, parse_amount, parse_month, parse_name
 
 
 FILES = ('transactions.jsonl', 'categories.jsonl', 'budgets.jsonl')
+OPTIONAL_FILES = ('recurring.jsonl',)
 
 
 def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -32,6 +33,7 @@ class Repository:
         self.directory = Path(data_dir)
         self.categories: set[str] = set()
         self.budgets: dict[str, int] = {}
+        self.recurring: dict[str, RecurringRule] = {}
         self._locked = False
         self._published = False
 
@@ -119,7 +121,16 @@ class Repository:
                 if type(amount) is not int or month in budgets:
                     raise InputError('중복 month 또는 잘못된 budget amount')
                 budgets[month] = parse_amount(amount)
+            recurring: dict[str, RecurringRule] = {}
+            for record in self._records('recurring.jsonl'):
+                rule = RecurringRule.from_dict(record, stored=True)
+                if rule.id in recurring:
+                    raise InputError('중복 반복 규칙 id')
+                if rule.category not in categories:
+                    raise InputError('반복 규칙의 미등록 category 참조')
+                recurring[rule.id] = rule
             ids: set[str] = set()
+            sources: set[tuple[str, str]] = set()
             for record in self._records('transactions.jsonl'):
                 transaction = Transaction.from_dict(record, stored=True)
                 if transaction.id in ids:
@@ -127,10 +138,16 @@ class Repository:
                 if transaction.category not in categories:
                     raise InputError('미등록 category 참조')
                 ids.add(transaction.id)
+                if transaction.recurring_id is not None:
+                    source = (transaction.recurring_id, transaction.recurring_month)
+                    if source in sources:
+                        raise InputError('중복 반복 거래 출처')
+                    sources.add(source)
         except InputError as exc:
             raise StorageError(f'데이터 손상: {exc}', '원본을 보존하고 데이터 형식과 참조를 확인하세요.') from exc
         self.categories = categories
         self.budgets = budgets
+        self.recurring = recurring
 
     def iter_transactions(self) -> Iterator[Transaction]:
         self._require_lock()
@@ -165,9 +182,20 @@ class Repository:
                 self._write_record(handle, {'month': month, 'amount': amount})
         self.atomic_write(self.path('budgets.jsonl'), write)
 
+    def write_recurring(self, rules: Iterable[RecurringRule]) -> None:
+        self._require_lock()
+        def write(handle: TextIO) -> None:
+            for rule in rules:
+                self._write_record(handle, rule.to_dict())
+        self.atomic_write(self.path('recurring.jsonl'), write)
+
+    def storage_filenames(self) -> tuple[str, ...]:
+        self._require_lock()
+        return FILES + tuple(name for name in OPTIONAL_FILES if self.path(name).exists())
+
     def check_export_path(self, target: Path, overwrite: bool) -> None:
         self._require_lock()
-        protected = [self.path(name) for name in FILES] + [self.lock_path]
+        protected = [self.path(name) for name in FILES + OPTIONAL_FILES] + [self.lock_path]
         try:
             resolved = target.resolve()
             protected_resolved = [internal.resolve() for internal in protected]
@@ -196,6 +224,14 @@ class Repository:
 
     def atomic_write(self, target: Path, writer: Callable[[TextIO], None], *,
                      overwrite: bool = True, export: bool = False) -> None:
+        self._atomic_write(target, writer, overwrite=overwrite, export=export)
+
+    def atomic_binary_write(self, target: Path, writer: Callable[[BinaryIO], None], *,
+                            overwrite: bool = False) -> None:
+        self._atomic_write(target, writer, overwrite=overwrite, export=True, binary=True)
+
+    def _atomic_write(self, target: Path, writer: Callable[[Any], None], *,
+                      overwrite: bool = True, export: bool = False, binary: bool = False) -> None:
         """Only the publication step changes the target; cleanup is unconditional."""
         self._require_lock()
         if export:
@@ -204,7 +240,8 @@ class Repository:
         temporary = Path(tempname)
         published = False
         try:
-            with os.fdopen(fd, 'w', encoding='utf-8', newline='') as handle:
+            options = {} if binary else {'encoding': 'utf-8', 'newline': ''}
+            with os.fdopen(fd, 'w+b' if binary else 'w', **options) as handle:
                 writer(handle)
                 handle.flush()
                 os.fsync(handle.fileno())

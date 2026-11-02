@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import heapq
+import calendar
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP, localcontext
 from itertools import chain
@@ -11,14 +12,14 @@ from typing import Any
 from uuid import uuid4
 
 from .errors import InputError, StorageError
-from .models import Transaction, parse_amount, parse_date, parse_month, parse_name
+from .models import RecurringRule, Transaction, parse_amount, parse_date, parse_month, parse_name
 from .repository import Repository
 
 
-def allocate_id(used: set[str]) -> str:
+def allocate_id(used: set[str], prefix: str = "TX-") -> str:
     """Allocate a UUID absent from existing and staged transactions."""
     for _ in range(10):
-        identifier = "TX-" + uuid4().hex
+        identifier = prefix + uuid4().hex
         if identifier not in used:
             used.add(identifier)
             return identifier
@@ -86,8 +87,10 @@ class Service:
         """Reject removal while any transaction references the category."""
         name = self._registered(name)
         count = sum(1 for row in self.repo.iter_transactions() if row.category == name)
-        if count:
-            raise InputError(f"사용 중인 카테고리입니다: {name} (거래 {count}건)", "해당 거래를 수정하거나 삭제한 후 다시 시도하세요.")
+        rule_count = sum(1 for rule in getattr(self.repo, "recurring", {}).values() if rule.category == name)
+        if count or rule_count:
+            raise InputError(f"사용 중인 카테고리입니다: {name} (거래 {count}건, 반복 규칙 {rule_count}건)",
+                             "해당 거래와 반복 규칙을 수정하거나 삭제한 후 다시 시도하세요.")
         categories = self.repo.categories - {name}
         self.repo.write_categories(sorted(categories))
         self.repo.categories = categories
@@ -99,6 +102,66 @@ class Service:
         budgets[month] = parse_amount(amount)
         self.repo.write_budgets(budgets)
         self.repo.budgets = budgets
+
+    def add_recurring(self, day: str | int, type: str, category: str,
+                      amount: str | int, memo: str = "", tags: str = "") -> RecurringRule:
+        """Register a template without generating transactions automatically."""
+        category = self._registered(category)
+        used = set(self.repo.recurring)
+        used.update(row.recurring_id for row in self.repo.iter_transactions() if row.recurring_id is not None)
+        rule = RecurringRule.from_dict({
+            "id": allocate_id(used, prefix="RR-"), "day": day, "type": type,
+            "category": category, "amount": amount, "memo": memo, "tags": tags,
+        })
+        rules = dict(self.repo.recurring)
+        rules[rule.id] = rule
+        self.repo.write_recurring(rules.values())
+        self.repo.recurring = rules
+        return rule
+
+    def list_recurring(self) -> list[RecurringRule]:
+        """Present templates in stable ID order."""
+        return sorted(self.repo.recurring.values(), key=lambda rule: rule.id)
+
+    def remove_recurring(self, id: str) -> None:
+        """Delete a template and preserve all historical transactions."""
+        if id not in self.repo.recurring:
+            raise InputError(f"없는 반복 규칙 id입니다: {id}", "recurring list로 규칙 id를 확인하세요.")
+        rules = dict(self.repo.recurring)
+        del rules[id]
+        self.repo.write_recurring(rules.values())
+        self.repo.recurring = rules
+
+    def apply_recurring(self, month: str) -> tuple[int, int]:
+        """Generate each missing rule/month pair and publish once after validation."""
+        month = parse_month(month)
+        if not self.repo.recurring:
+            return 0, 0
+        year, month_number = map(int, month.split("-"))
+        last_day = calendar.monthrange(year, month_number)[1]
+        used: set[str] = set()
+        applied: set[tuple[str, str]] = set()
+        for row in self.repo.iter_transactions():
+            used.add(row.id)
+            if row.recurring_id is not None and row.recurring_month is not None:
+                applied.add((row.recurring_id, row.recurring_month))
+        generated: list[Transaction] = []
+        skipped = 0
+        for rule in self.list_recurring():
+            pair = (rule.id, month)
+            if pair in applied:
+                skipped += 1
+                continue
+            self._registered(rule.category)
+            generated.append(Transaction(
+                id=allocate_id(used), date=parse_date(month + f"-{min(rule.day, last_day):02d}"),
+                type=rule.type, category=rule.category, amount=rule.amount,
+                memo=rule.memo, tags=rule.tags, recurring_id=rule.id, recurring_month=month,
+            ))
+            applied.add(pair)
+        if generated:
+            self.repo.write_transactions(chain(self.repo.iter_transactions(), generated))
+        return len(generated), skipped
 
     def select(
         self, limit: int = 20, from_date: str | None = None,
@@ -175,3 +238,8 @@ class Service:
             raise InputError("시작 날짜가 종료 날짜보다 늦습니다.")
         return export_csv(self.repo, destination, from_date=start, to_date=end,
                           overwrite=overwrite)
+
+    def backup(self, out_dir: str | Path | None = None) -> Path:
+        """Coordinate a validated repository snapshot without exposing file IO to CLI."""
+        from .backup import create_backup
+        return create_backup(self.repo, out_dir)

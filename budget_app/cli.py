@@ -7,6 +7,7 @@ from typing import Sequence
 
 from .decorators import user_errors
 from .errors import InputError
+from .formatting import escape_text, format_transactions
 from .models import Transaction, parse_amount, parse_date, parse_month, parse_name, parse_tags, validate_memo
 from .repository import Repository
 from .service import Service
@@ -51,6 +52,13 @@ def _top(value: str) -> int:
     if number > 100:
         raise InputError('top은 1~100이어야 합니다.')
     return number
+
+
+def _day_of_month(value: str) -> int:
+    day = parse_amount(value)
+    if day > 31:
+        raise InputError('day는 1~31이어야 합니다.')
+    return day
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -98,6 +106,22 @@ def build_parser() -> argparse.ArgumentParser:
     exporting.add_argument('--overwrite', action='store_true')
     importing = commands.add_parser('import', help='CSV 가져오기 (같은 파일 재실행 시 중복 추가)')
     importing.add_argument('--from', dest='source', required=True)
+    backup = commands.add_parser('backup', help='원본 바이트와 해시 manifest를 ZIP으로 백업')
+    backup.add_argument('--out-dir', help='백업 저장 폴더 (기본: data-dir/backups)')
+    recurring = commands.add_parser('recurring', help='월별 반복 거래 규칙 관리')
+    recurring_commands = recurring.add_subparsers(dest='action', required=True)
+    recurring_add = recurring_commands.add_parser('add', help='반복 규칙 추가')
+    recurring_add.add_argument('--day', type=_day_of_month, required=True)
+    recurring_add.add_argument('--type', choices=('income', 'expense'), required=True)
+    recurring_add.add_argument('--category', type=parse_name, required=True)
+    recurring_add.add_argument('--amount', type=_amount, required=True)
+    recurring_add.add_argument('--memo', type=_memo, default='')
+    recurring_add.add_argument('--tags', type=_tags, default='')
+    recurring_commands.add_parser('list', help='반복 규칙 ID순 조회')
+    recurring_remove = recurring_commands.add_parser('remove', help='규칙만 삭제 (생성된 거래 보존)')
+    recurring_remove.add_argument('--id', required=True)
+    recurring_apply = recurring_commands.add_parser('apply', help='지정 월의 미생성 반복 거래만 생성')
+    recurring_apply.add_argument('--month', type=parse_month, required=True)
     return parser
 
 
@@ -115,11 +139,8 @@ def _range(args: argparse.Namespace) -> tuple[str, str]:
 
 
 def _show_transactions(transactions: list[Transaction]) -> None:
-    if not transactions:
-        print('[데이터 없음]')
-    for transaction in transactions:
-        print(f'{transaction.id} | {transaction.date.isoformat()} | {transaction.type} | '
-              f'{transaction.category} | {transaction.amount} | {transaction.memo}')
+    for line in format_transactions(transactions):
+        print(line)
 
 
 @user_errors
@@ -186,6 +207,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.command == 'delete':
             service.delete(args.id)
             print(f'[삭제 완료] id={args.id}')
+        elif args.command == 'backup':
+            destination = service.backup(args.out_dir)
+            print(f'[백업 완료] {destination}')
+        elif args.command == 'recurring':
+            if args.action == 'add':
+                rule = service.add_recurring(args.day, args.type, args.category, args.amount,
+                                             memo=args.memo, tags=args.tags)
+                print(f'[저장 완료] id={rule.id}')
+            elif args.action == 'list':
+                rules = service.list_recurring()
+                if not rules:
+                    print('[데이터 없음]')
+                for rule in rules:
+                    print(f'{rule.id} | {rule.day} | {rule.type} | {rule.category} | '
+                          f'{rule.amount} | {escape_text(rule.memo)} | {",".join(rule.tags)}')
+            elif args.action == 'remove':
+                service.remove_recurring(args.id)
+                print(f'[삭제 완료] id={args.id}')
+            else:
+                generated, skipped = service.apply_recurring(args.month)
+                print(f'[완료] generated={generated}, skipped={skipped}')
         elif args.command == 'import':
             count = service.import_csv(args.source)
             print(f'[완료] imported={count}, skipped=0')

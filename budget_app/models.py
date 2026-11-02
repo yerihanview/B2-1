@@ -12,6 +12,7 @@ from .errors import InputError
 _NAME = re.compile(r"[A-Za-z0-9_-]{1,50}")
 _TAG = re.compile(r"[A-Za-z0-9_-]{1,30}")
 _ID = re.compile(r"TX-[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}")
+_RECURRING_ID = re.compile(r"RR-[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}")
 
 
 def parse_date(value: str) -> Date:
@@ -79,6 +80,38 @@ def validate_memo(value: str) -> str:
     return value
 
 
+def _record_tags(record: dict[str, Any], stored: bool) -> tuple[str, ...]:
+    raw_tags = record.get("tags", [])
+    if isinstance(raw_tags, str) and not stored:
+        return parse_tags(raw_tags)
+    if not isinstance(raw_tags, list):
+        raise InputError("태그는 문자열 목록이어야 합니다.")
+    parsed_tags = tuple(parse_name(tag, tag=True) for tag in raw_tags)
+    tags = tuple(dict.fromkeys(parsed_tags))
+    if stored and (tuple(raw_tags) != parsed_tags or parsed_tags != tags):
+        raise InputError("저장 태그가 정규형이 아닙니다.")
+    return tags
+
+
+def _validate_values(type: str, category: str, amount: int,
+                     memo: str, tags: tuple[str, ...]) -> None:
+    if type not in ("income", "expense"):
+        raise InputError("거래 타입은 income 또는 expense여야 합니다.")
+    if parse_name(category) != category:
+        raise InputError("저장 카테고리의 앞뒤 공백은 허용하지 않습니다.")
+    if isinstance(amount, bool) or not isinstance(amount, int):
+        raise InputError("거래 금액은 정수여야 합니다.")
+    parse_amount(amount)
+    validate_memo(memo)
+    if not isinstance(tags, tuple):
+        raise InputError("모델의 태그는 tuple이어야 합니다.")
+    seen: set[str] = set()
+    for tag in tags:
+        if parse_name(tag, tag=True) != tag or tag in seen:
+            raise InputError("저장 태그는 공백과 중복 없는 정규형이어야 합니다.")
+        seen.add(tag)
+
+
 @dataclass(frozen=True)
 class Transaction:
     """One validated immutable transaction, independent of storage format."""
@@ -90,60 +123,100 @@ class Transaction:
     amount: int
     memo: str = ""
     tags: tuple[str, ...] = ()
+    recurring_id: str | None = None
+    recurring_month: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not _ID.fullmatch(self.id):
             raise InputError("거래 id는 TX-와 UUID4 소문자 hex 32자리여야 합니다.")
-        if self.type not in ("income", "expense"):
-            raise InputError("거래 타입은 income 또는 expense여야 합니다.")
         if type(self.date) is not Date:
             raise InputError("거래 날짜는 유효한 date여야 합니다.")
-        if parse_name(self.category) != self.category:
-            raise InputError("저장 카테고리의 앞뒤 공백은 허용하지 않습니다.")
-        if type(self.amount) is not int:
-            raise InputError("거래 금액은 정수여야 합니다.")
-        parse_amount(self.amount)
-        validate_memo(self.memo)
-        if not isinstance(self.tags, tuple):
-            raise InputError("모델의 태그는 tuple이어야 합니다.")
-        seen: set[str] = set()
-        for tag in self.tags:
-            if parse_name(tag, tag=True) != tag or tag in seen:
-                raise InputError("저장 태그는 공백과 중복 없는 정규형이어야 합니다.")
-            seen.add(tag)
+        _validate_values(self.type, self.category, self.amount, self.memo, self.tags)
+        if self.recurring_id is None and self.recurring_month is None:
+            return
+        if not isinstance(self.recurring_id, str) or not _RECURRING_ID.fullmatch(self.recurring_id):
+            raise InputError("반복 출처는 유효한 RR UUID4 id여야 합니다.")
+        parse_month(self.recurring_month)
 
     @classmethod
     def from_dict(cls, record: dict[str, Any], stored: bool = False) -> Transaction:
         """Convert raw input or strict persisted JSON to a validated model."""
         required = {"id", "type", "date", "category", "amount"}
-        allowed = required | {"memo", "tags"}
+        allowed = required | {"memo", "tags", "recurring_id", "recurring_month"}
         if not isinstance(record, dict) or not required <= record.keys() or record.keys() - allowed:
             raise InputError("거래 필수 필드가 없거나 미정의 필드가 있습니다.")
         category = parse_name(record["category"])
         if stored and category != record["category"]:
             raise InputError("저장 카테고리가 정규형이 아닙니다.")
-        raw_tags = record.get("tags", [])
-        if isinstance(raw_tags, str) and not stored:
-            tags = parse_tags(raw_tags)
-        elif isinstance(raw_tags, list):
-            parsed_tags = tuple(parse_name(tag, tag=True) for tag in raw_tags)
-            tags = tuple(dict.fromkeys(parsed_tags))
-            if stored and (tuple(raw_tags) != parsed_tags or parsed_tags != tags):
-                raise InputError("저장 태그가 정규형이 아닙니다.")
-        else:
-            raise InputError("태그는 문자열 목록이어야 합니다.")
+        tags = _record_tags(record, stored)
+        provenance = {"recurring_id", "recurring_month"} & record.keys()
+        if provenance and (len(provenance) != 2 or
+                           not isinstance(record["recurring_id"], str) or
+                           not isinstance(record["recurring_month"], str)):
+            raise InputError("반복 출처 id와 month는 유효한 문자열 쌍이어야 합니다.")
         if stored and type(record["amount"]) is not int:
             raise InputError("저장 금액은 정수여야 합니다.")
         return cls(
             id=record["id"], type=record["type"], date=parse_date(record["date"]),
             category=category, amount=parse_amount(record["amount"]),
             memo=validate_memo(record.get("memo", "")), tags=tags,
+            recurring_id=record.get("recurring_id"), recurring_month=record.get("recurring_month"),
         )
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to the documented JSONL record schema."""
-        return {
+        result = {
             "id": self.id, "type": self.type, "date": self.date.isoformat(),
+            "category": self.category, "amount": self.amount,
+            "memo": self.memo, "tags": list(self.tags),
+        }
+        if self.recurring_id is not None:
+            result["recurring_id"] = self.recurring_id
+            result["recurring_month"] = self.recurring_month
+        return result
+
+
+@dataclass(frozen=True)
+class RecurringRule:
+    """A monthly template; applying it creates transactions without changing the rule."""
+
+    id: str
+    day: int
+    type: str
+    category: str
+    amount: int
+    memo: str = ""
+    tags: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.id, str) or not _RECURRING_ID.fullmatch(self.id):
+            raise InputError("반복 규칙 id는 RR-와 UUID4 소문자 hex 32자리여야 합니다.")
+        if isinstance(self.day, bool) or not isinstance(self.day, int) or not 1 <= self.day <= 31:
+            raise InputError("반복 날짜 day는 1~31 정수여야 합니다.")
+        _validate_values(self.type, self.category, self.amount, self.memo, self.tags)
+
+    @classmethod
+    def from_dict(cls, record: dict[str, Any], stored: bool = False) -> RecurringRule:
+        """Parse a strict stored rule or normalize a new input template."""
+        required = {"id", "day", "type", "category", "amount"}
+        allowed = required | {"memo", "tags"}
+        if not isinstance(record, dict) or not required <= record.keys() or record.keys() - allowed:
+            raise InputError("반복 규칙 필수 필드가 없거나 미정의 필드가 있습니다.")
+        category = parse_name(record["category"])
+        if stored and category != record["category"]:
+            raise InputError("저장 카테고리가 정규형이 아닙니다.")
+        if stored and (type(record["amount"]) is not int or type(record["day"]) is not int):
+            raise InputError("저장된 반복 금액과 day는 정수여야 합니다.")
+        return cls(
+            id=record["id"], day=parse_amount(record["day"]), type=record["type"],
+            category=category, amount=parse_amount(record["amount"]),
+            memo=validate_memo(record.get("memo", "")), tags=_record_tags(record, stored),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the optional recurring.jsonl schema."""
+        return {
+            "id": self.id, "day": self.day, "type": self.type,
             "category": self.category, "amount": self.amount,
             "memo": self.memo, "tags": list(self.tags),
         }

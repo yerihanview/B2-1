@@ -132,5 +132,6 @@ python scripts/benchmark.py --repeat 1
 - [미션 수행 전략](docs/mission-strategy.md), [학습 개념 지도](docs/learning-map.md), [데모](docs/demo.md)
 - [인수인계 검토 기록](docs/handover-review.md), [검수 결과와 증거](docs/validation-results.md)
 - [GitHub 제출 점검표](docs/submission-check.md), [평가 대비 설명과 연습 질문](docs/evaluation-guide.md)
+- [과잉 운영 검토 원문](docs/overengineering-review.md), [원인·재발 방지 지침·소스 재검토 설명](docs/overengineering-followup.md)
 
 공식 미션 달성과 별도로 명세 중심 AI 개발 운영법을 연구한다. 이 개인 연구는 공식 평가항목이 아니며 불필요한 하네스·로그 수집보다 실제 기능·안전성 검수를 우선한다.

@@ -1,0 +1,397 @@
+{
+  "version": "1.1.414",
+  "time": "1793681725595",
+  "generalDiagnostics": [
+    {
+      "file": "budget_app/cli.py",
+      "severity": "error",
+      "message": "Method \"error\" overrides class \"ArgumentParser\" in an incompatible manner\n  Return type mismatch: base method returns type \"NoReturn\", override returns type \"None\"\n    Type \"None\" is not assignable to type \"NoReturn\"",
+      "range": {
+        "start": {
+          "line": 21,
+          "character": 8
+        },
+        "end": {
+          "line": 21,
+          "character": 13
+        }
+      },
+      "rule": "reportIncompatibleMethodOverride"
+    },
+    {
+      "file": "budget_app/cli.py",
+      "severity": "error",
+      "message": "Argument of type \"_ExitCode\" cannot be assigned to parameter \"x\" of type \"ConvertibleToInt\" in function \"__new__\"\n  Type \"_ExitCode\" is not assignable to type \"ConvertibleToInt\"\n    Type \"None\" is not assignable to type \"ConvertibleToInt\"\n      \"None\" is not assignable to \"str\"\n      \"None\" is incompatible with protocol \"Buffer\"\n        \"__buffer__\" is not present\n      \"None\" is incompatible with protocol \"SupportsInt\"\n        \"__int__\" is not present\n      \"None\" is incompatible with protocol \"SupportsIndex\"\n  ...",
+      "range": {
+        "start": {
+          "line": 151,
+          "character": 19
+        },
+        "end": {
+          "line": 151,
+          "character": 27
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/cli.py",
+      "severity": "error",
+      "message": "Argument of type \"_ExitCode\" cannot be assigned to parameter \"x\" of type \"ConvertibleToInt\" in function \"__new__\"\n  Type \"_ExitCode\" is not assignable to type \"ConvertibleToInt\"\n    Type \"None\" is not assignable to type \"ConvertibleToInt\"\n      \"None\" is not assignable to \"str\"\n      \"None\" is incompatible with protocol \"Buffer\"\n        \"__buffer__\" is not present\n      \"None\" is incompatible with protocol \"SupportsInt\"\n        \"__int__\" is not present\n      \"None\" is incompatible with protocol \"SupportsIndex\"",
+      "range": {
+        "start": {
+          "line": 151,
+          "character": 19
+        },
+        "end": {
+          "line": 151,
+          "character": 27
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/cli.py",
+      "severity": "error",
+      "message": "Object of type \"None\" is not subscriptable",
+      "range": {
+        "start": {
+          "line": 235,
+          "character": 59
+        },
+        "end": {
+          "line": 235,
+          "character": 67
+        }
+      },
+      "rule": "reportOptionalSubscript"
+    },
+    {
+      "file": "budget_app/cli.py",
+      "severity": "error",
+      "message": "Object of type \"None\" is not subscriptable",
+      "range": {
+        "start": {
+          "line": 235,
+          "character": 80
+        },
+        "end": {
+          "line": 235,
+          "character": 88
+        }
+      },
+      "rule": "reportOptionalSubscript"
+    },
+    {
+      "file": "budget_app/models.py",
+      "severity": "error",
+      "message": "Argument of type \"str | None\" cannot be assigned to parameter \"value\" of type \"str\" in function \"parse_month\"\n  Type \"str | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+      "range": {
+        "start": {
+          "line": 138,
+          "character": 20
+        },
+        "end": {
+          "line": 138,
+          "character": 40
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "Argument of type \"object\" cannot be assigned to parameter \"value\" of type \"str\" in function \"parse_month\"\n  \"object\" is not assignable to \"str\"",
+      "range": {
+        "start": {
+          "line": 118,
+          "character": 36
+        },
+        "end": {
+          "line": 118,
+          "character": 51
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "Argument of type \"tuple[str, str | None]\" cannot be assigned to parameter \"element\" of type \"tuple[str, str]\" in function \"add\"\n  \"tuple[str, str | None]\" is not assignable to \"tuple[str, str]\"\n    Tuple entry 2 is incorrect type\n      Type \"str | None\" is not assignable to type \"str\"\n        \"None\" is not assignable to \"str\"",
+      "range": {
+        "start": {
+          "line": 144,
+          "character": 32
+        },
+        "end": {
+          "line": 144,
+          "character": 38
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "No overloads for \"fdopen\" match the provided arguments",
+      "range": {
+        "start": {
+          "line": 243,
+          "character": 17
+        },
+        "end": {
+          "line": 243,
+          "character": 67
+        }
+      },
+      "rule": "reportCallIssue"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "Argument of type \"str\" cannot be assigned to parameter \"buffering\" of type \"int\" in function \"fdopen\"\n  \"str\" is not assignable to \"int\"",
+      "range": {
+        "start": {
+          "line": 243,
+          "character": 59
+        },
+        "end": {
+          "line": 243,
+          "character": 66
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "Argument of type \"str\" cannot be assigned to parameter \"closefd\" of type \"bool\" in function \"fdopen\"\n  \"str\" is not assignable to \"bool\"",
+      "range": {
+        "start": {
+          "line": 243,
+          "character": 59
+        },
+        "end": {
+          "line": 243,
+          "character": 66
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "budget_app/repository.py",
+      "severity": "error",
+      "message": "Argument of type \"str\" cannot be assigned to parameter \"opener\" of type \"_Opener | None\" in function \"fdopen\"\n  Type \"str\" is not assignable to type \"_Opener | None\"\n    Type \"str\" is not assignable to type \"_Opener\"\n    \"str\" is not assignable to \"None\"",
+      "range": {
+        "start": {
+          "line": 243,
+          "character": 59
+        },
+        "end": {
+          "line": 243,
+          "character": 66
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "scripts/benchmark.py",
+      "severity": "error",
+      "message": "Argument of type \"str | None\" cannot be assigned to parameter \"s\" of type \"str | bytes | bytearray\" in function \"loads\"\n  Type \"str | None\" is not assignable to type \"str | bytes | bytearray\"\n    Type \"None\" is not assignable to type \"str | bytes | bytearray\"\n      \"None\" is not assignable to \"str\"\n      \"None\" is not assignable to \"bytes\"\n      \"None\" is not assignable to \"bytearray\"",
+      "range": {
+        "start": {
+          "line": 69,
+          "character": 34
+        },
+        "end": {
+          "line": 69,
+          "character": 38
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "scripts/bonus_smoke.py",
+      "severity": "error",
+      "message": "\"group\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 42,
+          "character": 60
+        },
+        "end": {
+          "line": 42,
+          "character": 65
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "scripts/smoke.py",
+      "severity": "error",
+      "message": "\"group\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 46,
+          "character": 58
+        },
+        "end": {
+          "line": 46,
+          "character": 63
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "scripts/smoke.py",
+      "severity": "error",
+      "message": "\"group\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 47,
+          "character": 60
+        },
+        "end": {
+          "line": 47,
+          "character": 65
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "tests/test_bonus_acceptance.py",
+      "severity": "error",
+      "message": "\"group\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 70,
+          "character": 63
+        },
+        "end": {
+          "line": 70,
+          "character": 68
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "tests/test_bonus_acceptance.py",
+      "severity": "error",
+      "message": "\"total_seconds\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 113,
+          "character": 47
+        },
+        "end": {
+          "line": 113,
+          "character": 60
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "tests/test_models.py",
+      "severity": "error",
+      "message": "Cannot assign to attribute \"amount\" for class \"Transaction\"\n  Attribute \"amount\" is read-only",
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 24
+        },
+        "end": {
+          "line": 26,
+          "character": 30
+        }
+      },
+      "rule": "reportAttributeAccessIssue"
+    },
+    {
+      "file": "tests/test_repository.py",
+      "severity": "error",
+      "message": "Argument of type \"(handle: TextIO) -> int\" cannot be assigned to parameter \"writer\" of type \"(TextIO) -> None\" in function \"atomic_write\"\n  Type \"(handle: TextIO) -> int\" is not assignable to type \"(TextIO) -> None\"\n    Function return type \"int\" is incompatible with type \"None\"\n      \"int\" is not assignable to \"None\"",
+      "range": {
+        "start": {
+          "line": 69,
+          "character": 51
+        },
+        "end": {
+          "line": 69,
+          "character": 89
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "tests/test_repository.py",
+      "severity": "error",
+      "message": "Argument of type \"(handle: TextIO) -> int\" cannot be assigned to parameter \"writer\" of type \"(TextIO) -> None\" in function \"atomic_write\"\n  Type \"(handle: TextIO) -> int\" is not assignable to type \"(TextIO) -> None\"\n    Function return type \"int\" is incompatible with type \"None\"\n      \"int\" is not assignable to \"None\"",
+      "range": {
+        "start": {
+          "line": 82,
+          "character": 51
+        },
+        "end": {
+          "line": 82,
+          "character": 89
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "tests/test_repository.py",
+      "severity": "error",
+      "message": "Argument of type \"(handle: TextIO) -> int\" cannot be assigned to parameter \"writer\" of type \"(TextIO) -> None\" in function \"atomic_write\"\n  Type \"(handle: TextIO) -> int\" is not assignable to type \"(TextIO) -> None\"\n    Function return type \"int\" is incompatible with type \"None\"\n      \"int\" is not assignable to \"None\"",
+      "range": {
+        "start": {
+          "line": 108,
+          "character": 52
+        },
+        "end": {
+          "line": 108,
+          "character": 92
+        }
+      },
+      "rule": "reportArgumentType"
+    },
+    {
+      "file": "tests/test_repository.py",
+      "severity": "error",
+      "message": "\"split\" is not a known attribute of \"None\"",
+      "range": {
+        "start": {
+          "line": 206,
+          "character": 41
+        },
+        "end": {
+          "line": 206,
+          "character": 46
+        }
+      },
+      "rule": "reportOptionalMemberAccess"
+    },
+    {
+      "file": "tests/test_service.py",
+      "severity": "error",
+      "message": "Argument of type \"MemoryRepository\" cannot be assigned to parameter \"repo\" of type \"Repository\" in function \"__init__\"\n  \"MemoryRepository\" is not assignable to \"Repository\"",
+      "range": {
+        "start": {
+          "line": 49,
+          "character": 31
+        },
+        "end": {
+          "line": 49,
+          "character": 40
+        }
+      },
+      "rule": "reportArgumentType"
+    }
+  ],
+  "summary": {
+    "filesAnalyzed": 23,
+    "errorCount": 24,
+    "warningCount": 0,
+    "informationCount": 0,
+    "timeInSec": 1.923
+  }
+}

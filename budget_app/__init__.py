@@ -1,1 +1,1 @@
-"""Standard-library CLI budget ledger."""
+"""표준 라이브러리로 구현한 CLI 가계부 패키지."""

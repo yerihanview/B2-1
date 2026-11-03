@@ -9,8 +9,8 @@ from typing import Any
 
 from .errors import InputError
 
-_NAME = re.compile(r"[A-Za-z0-9_-]{1,50}")
-_TAG = re.compile(r"[A-Za-z0-9_-]{1,30}")
+_NAME = re.compile(r"[가-힣A-Za-z0-9_-]{1,50}")
+_TAG = re.compile(r"[가-힣A-Za-z0-9_-]{1,30}")
 _ID = re.compile(r"TX-[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}")
 _RECURRING_ID = re.compile(r"RR-[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}")
 
@@ -56,7 +56,7 @@ def parse_name(value: str, tag: bool = False) -> str:
     result = value.strip()
     if not (_TAG if tag else _NAME).fullmatch(result):
         maximum = 30 if tag else 50
-        raise InputError(f"{label} 형식이 올바르지 않습니다.", f"영문·숫자·밑줄·하이픈 {maximum}자 이내로 입력하세요.")
+        raise InputError(f"{label} 형식이 올바르지 않습니다.", f"한글(가-힣)·영문·숫자·밑줄·하이픈 1~{maximum}자로 입력하세요.")
     return result
 
 

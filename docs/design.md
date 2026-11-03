@@ -18,7 +18,7 @@ CLI는 파일을 직접 만지지 않는다. Repository는 입출력 UI나 도�
 - Transaction: id: str, type: income|expense, date: date, category: str, amount: int (>0), memo: str, tags: tuple[str,...].
 - Category(name: str), Budget(month: YYYY-MM, amount: int > 0).
 - 거래 id는 `TX-` + uuid4 hex 32자리; 재사용·수정 불가. import 시 새 id 부여.
-- 카테고리는 대소문자를 구별하며 spec.md의 ASCII 문자·길이 제약을 따른다. 이미 참조된 카테고리는 삭제 금지.
+- 카테고리는 대소문자를 구별하며 spec.md의 한글 완성형(가-힣)·영문·숫자·밑줄·하이픈 문자 및 길이 제약을 따른다. 이미 참조된 카테고리는 삭제 금지.
 - 금액은 원 단위 양의 정수. 부동소수점은 사용하지 않는다.
 
 ## 영속성
@@ -81,3 +81,5 @@ CLI는 파일을 직접 만지지 않는다. Repository는 입출력 UI나 도�
 - ADR-21 출력: stdlib unicodedata로 표시 폭을 계산하고 제어문자를 출력 시에만 이스케이프한다. 조회 순서·검색조건·원본 메모는 유지한다.
 - 모델 검증·규칙은 models/Service, 잠금·선택 파일 검증·백업 발행은 Repository, ZIP 변환은 별도 helper, 테이블 표시는 presentation 모듈로 나눈다. CSV와 같은 계층 원칙을 유지한다.
 - 메모리 비용에는 ID 집합·출처 쌍·규칙 집합이 포함된다. 조회 힙 외 전체 메모리를 O(K)라고 주장하지 않는다.
+
+- 한글 이름 지원(2026-11-03): 공용 이름 검증에 가-힣만 추가한다. 기존 문자·길이·trim·태그 중복 제거는 유지하며 저장 포맷·Repository·잠금·원자 교체·Unicode 정규화는 변경하지 않는다.

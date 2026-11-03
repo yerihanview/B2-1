@@ -49,9 +49,25 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(parse_name(" food "), "food")
         self.assertEqual(parse_tags("meal, work,meal"), ("meal", "work"))
         self.assertEqual(parse_tags(""), ())
-        for value in ["a,,b", " ", "a,", ",a", "한글"]:
+        for value in ["a,,b", " ", "a,", ",a", "한글!"]:
             with self.subTest(value=value), self.assertRaises(InputError):
                 parse_tags(value)
+
+    def test_hangul_names_tags_and_length_boundaries(self):
+        for value in ["식비", "교통비", "월급", "식비_food-1", "가", "힣", "가" * 50]:
+            with self.subTest(value=value):
+                self.assertEqual(parse_name(" " + value + " "), value)
+        self.assertEqual(parse_tags("점심, 외식,정기지출,점심"), ("점심", "외식", "정기지출"))
+        self.assertEqual(parse_name("힣" * 30, tag=True), "힣" * 30)
+
+    def test_hangul_rejects_specials_jamo_and_excess_length(self):
+        for tag, maximum in [(False, 50), (True, 30)]:
+            for value in ["가" * (maximum + 1), "한글!", "식 비", "ㄱ", "가", "食費", "é", "외식🙂"]:
+                with self.subTest(tag=tag, value=value):
+                    with self.assertRaises(InputError) as error:
+                        parse_name(value, tag=tag)
+                    self.assertIn("한글(가-힣)", error.exception.hint)
+                    self.assertIn(f"1~{maximum}자", error.exception.hint)
 
     def test_stored_fields_are_strict_and_never_normalized(self):
         for changes in [

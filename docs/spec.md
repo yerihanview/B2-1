@@ -15,7 +15,7 @@
 - categories.jsonl: `{"name":"food"}`; budgets.jsonl: `{"month":"2024-01","amount":500000}`.
 - 세 파일은 UTF-8 JSONL. JSONL의 비어 있는 행/유효하지 않은 JSON/중복 id/중복 category/중복 month/형식 불일치는 데이터 손상 오류로 다룬다.
 - 거래 필수: id(유일), type income|expense, date 유효한 YYYY-MM-DD, amount 양의 정수(bool 거부), category 등록된 이름. memo/tags는 선택이고 기본 빈 값.
-- category: trim 후 1~50자, 공백 없는 영문·숫자·밑줄·하이픈 (`^[A-Za-z0-9_-]{1,50}$`), 대소문자 구별; 거래·CSV 양쪽 동일 정책. 태그: trim 후 같은 문자 규칙, 각 1~30자, 중복 제거 후 원래 순서 유지. memo: UTF-8 텍스트 0~500자.
+- category: trim 후 1~50자, 공백 없는 한글 완성형(가-힣)·영문·숫자·밑줄·하이픈 (`^[가-힣A-Za-z0-9_-]{1,50}$`), 대소문자 구별; 거래·CSV 양쪽 동일 정책. 태그: trim 후 같은 문자 규칙, 각 1~30자, 중복 제거 후 원래 순서 유지. memo: UTF-8 텍스트 0~500자. 한글 자모·분해형은 허용하지 않으며 Unicode 정규화를 추가하지 않는다.
 - 날짜 범위 경계는 양 끝 포함; from > to면 오류. month는 YYYY-MM 형식이며 실제 유효월.
 - 거래 id 새로 생성: TX- + uuid4 hex 32자. 삭제된 id 재사용 금지(실질적으로 UUID 확률에 의존); 기존 레코드 수정 시 id 유지.
 - JSON 객체의 중복 키·미정의 키·잘못된 값 타입은 손상 오류다. 거래의 memo/tags 생략은 각각 빈 문자열/빈 목록으로 읽는다. 저장된 category/tag는 이미 정규형이어야 하며 trim·중복 제거로 손상을 자동 수정하지 않는다. 거래의 미등록 category 참조도 손상 오류다. 모든 데이터 명령은 검색조건·limit과 관계없이 세 파일 전체를 검증하고, 검증 완료 전 성공 결과를 출력하거나 기존 파일을 변경하지 않는다.

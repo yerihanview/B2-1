@@ -298,8 +298,51 @@ class IndependentCLIAcceptance(unittest.TestCase):
         self.cli('category', 'remove', stdin='Food\n')
         self.cli('category', 'remove', stdin='z\n')
         self.assertEqual({r['name'] for r in self.rows('categories.jsonl')}, {'food','A'})
-        for value in ['한글', 'bad name', '', 'x'*51]:
+        for value in ['한글!', 'bad name', '', 'x'*51]:
             self.cli('category', 'add', stdin=value+'\n', expected=2)
+
+    def test_hangul_lifecycle_csv_and_legacy_compatibility(self) -> None:
+        legacy = self.transaction(category='food', memo='legacy', tags=['meal', 'old_tag-1'])
+        self.seed([legacy])
+        for category in ['식비', '교통비', '월급']:
+            self.cli('category', 'add', stdin=category+'\n')
+        listed_categories = self.cli('category', 'list').stdout
+        for category in ['식비', '교통비', '월급']:
+            self.assertIn(category, listed_categories)
+        self.cli('add', stdin='2024-02-29\nexpense\n식비\n15000\n한글 거래\n점심,외식,정기지출,점심\n')
+        created = self.rows()[-1]
+        identifier = created['id']
+        self.assertEqual(created['category'], '식비')
+        self.assertEqual(created['tags'], ['점심', '외식', '정기지출'])
+        self.assertEqual(self.rows()[0], legacy)
+        self.assertIn('식비', (self.data/'transactions.jsonl').read_text(encoding='utf-8'))
+        found = self.cli('search', '--category', '식비', '--tag', '점심', '--q', '한글').stdout
+        self.assertEqual(self.listed_ids(found), [identifier])
+        self.cli('update', '--id', identifier, '--category', '교통비',
+                 '--memo', '수정된 한글', '--tags', '정기지출,점심,외식')
+        updated = self.rows()[-1]
+        self.assertEqual(updated['id'], identifier)
+        self.assertEqual(updated['category'], '교통비')
+        self.assertEqual(updated['tags'], ['정기지출', '점심', '외식'])
+        self.assertEqual(self.listed_ids(self.cli('search', '--category', '교통비',
+                                               '--tag', '정기지출').stdout), [identifier])
+        output = self.root/'hangul.csv'
+        self.cli('export', '--out', str(output), '--month', '2024-02')
+        with output.open(encoding='utf-8', newline='') as source:
+            exported = list(csv.reader(source))
+        self.assertEqual(exported, [HEADER, ['2024-02-29', 'expense', '교통비', '15000',
+                                             '수정된 한글', '정기지출,점심,외식']])
+        self.assertIn('imported=1', self.cli('import', '--from', str(output)).stdout)
+        imported = self.rows()[-1]
+        self.assertNotEqual(imported['id'], identifier)
+        self.assertEqual({k:v for k,v in imported.items() if k!='id'},
+                         {k:v for k,v in updated.items() if k!='id'})
+        self.cli('delete', '--id', identifier)
+        self.cli('delete', '--id', imported['id'])
+        self.assertEqual(self.rows(), [legacy])
+        self.assertEqual(self.listed_ids(self.cli('search', '--category', 'food',
+                                               '--tag', 'meal').stdout), [legacy['id']])
+        self.assert_clean()
 
     def test_T08_export_filters_file_order_schema_and_overwrite(self) -> None:
         a = self.transaction(date='2024-01-30', memo='점심,"quoted"', tags=['meal','weekday'])

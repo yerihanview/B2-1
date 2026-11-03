@@ -44,8 +44,12 @@ def main() -> None:
         run('category', 'remove', text='unused\n')
         income = run('add', text='2024-01-01\nincome\nsalary\n100000\n가상 수입\n\n')
         expense = run('add', text='2024-01-15\nexpense\nfood\n15000\n점심\nmeal,weekday\n')
-        income_id = re.search(r'TX-[0-9a-f]{32}', income).group()
-        expense_id = re.search(r'TX-[0-9a-f]{32}', expense).group()
+        income_id_match = re.search(r'TX-[0-9a-f]{32}', income)
+        assert income_id_match is not None
+        income_id = income_id_match.group()
+        expense_id_match = re.search(r'TX-[0-9a-f]{32}', expense)
+        assert expense_id_match is not None
+        expense_id = expense_id_match.group()
         listed = run('list', '--limit', '20')
         assert listed.index(expense_id) < listed.index(income_id)
         searched = run('search', '--from', '2024-01-15', '--to', '2024-01-15', '--tag', 'meal')

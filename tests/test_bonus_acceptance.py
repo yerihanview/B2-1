@@ -68,6 +68,7 @@ class IndependentBonusAcceptance(unittest.TestCase):
         rules = self.rows('recurring.jsonl')
         match = re.search(r'RR-[0-9a-f]{32}', result.stdout)
         self.assertIsNotNone(match)
+        assert match is not None
         rule = next(row for row in rules if row['id'] == match.group(0))
         self.assertRegex(rule['id'],r'^RR-[0-9a-f]{32}$')
         self.assertEqual(uuid.UUID(hex=rule['id'][3:]).version,4)
@@ -110,8 +111,10 @@ class IndependentBonusAcceptance(unittest.TestCase):
             self.assertEqual(manifest['format'],'budget_app_backup')
             self.assertEqual(manifest['version'],1)
             stamp = datetime.fromisoformat(manifest['created_at'].replace('Z','+00:00'))
-            self.assertIsNotNone(stamp.utcoffset())
-            self.assertEqual(stamp.utcoffset().total_seconds(),0)
+            offset = stamp.utcoffset()
+            self.assertIsNotNone(offset)
+            assert offset is not None
+            self.assertEqual(offset.total_seconds(),0)
             self.assertEqual(set(manifest['files']),set(FILES))
             for filename,raw in before.items():
                 self.assertEqual(archive.read(filename),raw)

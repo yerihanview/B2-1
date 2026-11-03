@@ -40,7 +40,9 @@ def main() -> None:
         registered = run('recurring', 'add', '--day', '31', '--type', 'income',
                          '--category', 'salary', '--amount', '3000000',
                          '--memo', '가상 월급', '--tags', 'monthly')
-        rule_id = re.search(r'RR-[0-9a-f]{32}', registered).group()
+        rule_id_match = re.search(r'RR-[0-9a-f]{32}', registered)
+        assert rule_id_match is not None
+        rule_id = rule_id_match.group()
         run('recurring', 'list')
         assert 'generated=1' in run('recurring', 'apply', '--month', '2024-02')
         transactions = data / 'transactions.jsonl'

@@ -25,7 +25,7 @@ def parse_date(value: str) -> Date:
         raise InputError("존재하지 않는 날짜입니다.", "유효한 날짜(예: 2024-01-15)를 입력하세요.") from exc
 
 
-def parse_month(value: str) -> str:
+def parse_month(value: object) -> str:
     """Validate a fixed-width year-month."""
     if not isinstance(value, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}", value):
         raise InputError("월 형식이 올바르지 않습니다.", "YYYY-MM 형식으로 입력하세요.")

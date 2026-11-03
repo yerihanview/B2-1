@@ -16,7 +16,7 @@ from budget_app.errors import InputError, StorageError
 from budget_app.service import Service, allocate_id
 
 
-class MemoryRepository:
+class MemoryRepository(Repository):
     def __init__(self):
         self.categories = {"food", "salary", "transport"}
         self.budgets = {}
@@ -26,14 +26,14 @@ class MemoryRepository:
     def iter_transactions(self):
         yield from self.rows
 
-    def write_transactions(self, rows):
-        staged = list(rows)
+    def write_transactions(self, transactions):
+        staged = list(transactions)
         if self.fail:
             raise StorageError("test failure")
         self.rows = staged
 
-    def write_categories(self, names):
-        staged = set(names)
+    def write_categories(self, categories):
+        staged = set(categories)
         if self.fail:
             raise StorageError("test failure")
         self.categories = staged

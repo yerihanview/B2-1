@@ -139,7 +139,7 @@ class Repository:
                     raise InputError('미등록 category 참조')
                 ids.add(transaction.id)
                 if transaction.recurring_id is not None:
-                    source = (transaction.recurring_id, transaction.recurring_month)
+                    source = (transaction.recurring_id, parse_month(transaction.recurring_month))
                     if source in sources:
                         raise InputError('중복 반복 거래 출처')
                     sources.add(source)
@@ -240,8 +240,9 @@ class Repository:
         temporary = Path(tempname)
         published = False
         try:
-            options = {} if binary else {'encoding': 'utf-8', 'newline': ''}
-            with os.fdopen(fd, 'w+b' if binary else 'w', **options) as handle:
+            handle = (os.fdopen(fd, 'w+b') if binary else
+                      os.fdopen(fd, 'w', encoding='utf-8', newline=''))
+            with handle:
                 writer(handle)
                 handle.flush()
                 os.fsync(handle.fileno())

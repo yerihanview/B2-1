@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import calendar
 from decimal import Decimal
-from typing import Sequence
+from typing import NoReturn, Sequence
 
 from .decorators import user_errors
 from .errors import InputError
@@ -19,7 +19,7 @@ class Parser(argparse.ArgumentParser):
         kwargs.setdefault('allow_abbrev', False)
         super().__init__(*args, **kwargs)
 
-    def error(self, message: str) -> None:
+    def error(self, message: str) -> NoReturn:
         raise InputError(message, '명령과 필수 옵션을 확인하세요. --help로 사용법을 볼 수 있습니다.')
 
 
@@ -149,7 +149,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
     except SystemExit as exc:
-        return int(exc.code)
+        return exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
     changes = {}
     if args.command == 'update':
         changes = {name: getattr(args, name) for name in
@@ -233,6 +233,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             count = service.import_csv(args.source)
             print(f'[완료] imported={count}, skipped=0')
         elif args.command == 'export':
+            assert interval is not None
             count = service.export_csv(args.out, from_date=interval[0], to_date=interval[1],
                                overwrite=args.overwrite)
             print(f'[완료] exported={count} {args.out}')

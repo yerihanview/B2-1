@@ -67,6 +67,7 @@ def worker(arguments: list[str], input_text: str) -> None:
                 last = None
                 for line in stream:
                     last = line
+                assert last is not None
                 assert json.loads(last)['memo'] == '가상 추가'
     print(json.dumps(dict(seconds=round(elapsed, 6), peak_bytes=peak, exit_code=code,
                           output_rows=output_rows, functional_check=True)))

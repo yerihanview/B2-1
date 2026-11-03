@@ -24,7 +24,7 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(transaction.memo, " 점심 ")
         self.assertEqual(Transaction.from_dict(transaction.to_dict(), stored=True), transaction)
         with self.assertRaises(FrozenInstanceError):
-            transaction.amount = 3
+            setattr(transaction, 'amount', 3)
 
     def test_optional_fields_default(self):
         row = Transaction.from_dict(self.record(), stored=True)

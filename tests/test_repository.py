@@ -20,6 +20,12 @@ from budget_app.repository import FILES, Repository
 from budget_app.service import Service
 
 
+def write_text(text: str) -> typing.Callable[[typing.TextIO], None]:
+    def writer(handle: typing.TextIO) -> None:
+        handle.write(text)
+    return writer
+
+
 class RepositoryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -67,7 +73,7 @@ class RepositoryTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), before)
             with patch('budget_app.repository.os.fsync', side_effect=OSError('fsync failure')):
                 with self.assertRaises(OSError):
-                    self.repo.atomic_write(target, lambda handle: handle.write('partial'))
+                    self.repo.atomic_write(target, write_text('partial'))
             self.assertEqual(target.read_bytes(), before)
             real_fdopen = __import__('os').fdopen
             class FlushFailure:
@@ -80,7 +86,7 @@ class RepositoryTests(unittest.TestCase):
                 return FlushFailure(real_fdopen(*args, **kwargs))
             with patch('budget_app.repository.os.fdopen', side_effect=bad_fdopen):
                 with self.assertRaises(OSError):
-                    self.repo.atomic_write(target, lambda handle: handle.write('partial'))
+                    self.repo.atomic_write(target, write_text('partial'))
             self.assertEqual(target.read_bytes(), before)
         self.assertFalse(list(self.repo.directory.glob('.budget-*.tmp')))
 
@@ -106,7 +112,7 @@ class RepositoryTests(unittest.TestCase):
             return real_unlink(path, *args, **kwargs)
         with self.repo.session(), patch.object(Path, 'unlink', fail_first_temp_unlink):
             with self.assertRaises(DurabilityError):
-                self.repo.atomic_write(destination, lambda handle: handle.write('published'), overwrite=False, export=True)
+                self.repo.atomic_write(destination, write_text('published'), overwrite=False, export=True)
         self.assertEqual(destination.read_text(), 'published')
         self.assertFalse(list(self.root.glob('.budget-*.tmp')))
 
@@ -204,6 +210,7 @@ class RepositoryTests(unittest.TestCase):
                 if isinstance(node, ast.Import):
                     roots = [alias.name.split('.')[0] for alias in node.names]
                 elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                    assert node.module is not None
                     roots = [node.module.split('.')[0]]
                 else:
                     continue

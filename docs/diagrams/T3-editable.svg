@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1030" viewBox="0 0 1440 1030" role="img" aria-label="T3 제너레이터와 스트리밍: 거래 데이터를 하나씩 읽는 처리 흐름">
+<defs><marker id="arr" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9Z" fill="#547089"/></marker><marker id="arr2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9Z" fill="#26876c"/></marker></defs>
+<rect width="1440" height="1030" fill="#f6f9fd"/>
+<rect x="30" y="26" width="1380" height="96" rx="22" fill="#192f4d" stroke="none" stroke-width="1.5"/>
+<text x="67" y="77" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="36" font-weight="800" fill="#ffffff" text-anchor="start">T3  제너레이터와 스트리밍</text>
+<text x="69" y="103" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="500" fill="#d1e0ef" text-anchor="start">거래를 모두 메모리에 올리지 않고, 필요한 시점에 한 건씩 읽어 처리한다</text>
+<text x="57" y="171" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="800" fill="#142b49" text-anchor="start">① 전체 동작 — JSONL 거래 조회</text>
+<rect x="48" y="189" width="1344" height="314" rx="20" fill="#ffffff" stroke="#d7e2ee" stroke-width="1.5"/>
+<rect x="75" y="232" width="210" height="180" rx="18" fill="#edf5ff" stroke="#b6d0ee" stroke-width="1.5"/>
+<rect x="95" y="250" width="170" height="35" rx="17" fill="#e7eff8" stroke="none" stroke-width="1.5"/>
+<text x="180.0" y="275" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#1f4267" text-anchor="middle">디스크에 저장</text>
+<text x="180" y="318" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="700" fill="#19385b" text-anchor="middle">transactions.jsonl</text>
+<text x="180" y="358" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="600" fill="#36516b" text-anchor="middle">거래 1</text>
+<text x="180" y="386" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="500" fill="#36516b" text-anchor="middle">거래 2 · 거래 3 · …</text>
+<line x1="289" y1="320" x2="356" y2="320" stroke="#547089" stroke-width="3"  marker-end="url(#arr)"/>
+<text x="323" y="293" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#46627d" text-anchor="middle">한 줄씩</text>
+<rect x="363" y="232" width="225" height="180" rx="18" fill="#eafaf4" stroke="#9edbc5" stroke-width="1.5"/>
+<rect x="382" y="250" width="185" height="35" rx="17" fill="#c8f2e3" stroke="none" stroke-width="1.5"/>
+<text x="474.5" y="275" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#1d7159" text-anchor="middle">읽기: Repository</text>
+<text x="476" y="320" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="700" fill="#1c5645" text-anchor="middle">iter_transactions()</text>
+<text x="476" y="352" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="600" fill="#215b4c" text-anchor="middle">요청받을 때</text>
+<text x="476" y="380" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="600" fill="#215b4c" text-anchor="middle">거래 1건을 전달</text>
+<line x1="592" y1="320" x2="651" y2="320" stroke="#547089" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="660" y="232" width="235" height="180" rx="18" fill="#fff5e5" stroke="#ecd3a4" stroke-width="1.5"/>
+<rect x="680" y="250" width="195" height="35" rx="17" fill="#ffe7b7" stroke="none" stroke-width="1.5"/>
+<text x="777.5" y="275" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#88601f" text-anchor="middle">처리: Service</text>
+<text x="778" y="320" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="700" fill="#725220" text-anchor="middle">조건 확인</text>
+<text x="778" y="352" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="500" fill="#775d36" text-anchor="middle">예: 카테고리 필터</text>
+<text x="778" y="380" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="500" fill="#775d36" text-anchor="middle">조회 대상 선정</text>
+<line x1="898" y1="320" x2="957" y2="320" stroke="#547089" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="966" y="232" width="390" height="180" rx="18" fill="#f1efff" stroke="#c7bff3" stroke-width="1.5"/>
+<rect x="989" y="250" width="344" height="35" rx="17" fill="#ded9ff" stroke="none" stroke-width="1.5"/>
+<text x="1161.0" y="275" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#514b94" text-anchor="middle">결과: CLI</text>
+<text x="1160" y="319" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="700" fill="#4d4587" text-anchor="middle">조회된 거래 목록</text>
+<text x="1160" y="355" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="19" font-weight="500" fill="#595387" text-anchor="middle">필요한 거래만 출력</text>
+<text x="1160" y="384" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="500" fill="#595387" text-anchor="middle">(최신순·건수 제한 등 적용)</text>
+<rect x="93" y="438" width="1245" height="43" rx="11" fill="#f0f7ff" stroke="none" stroke-width="1.5"/>
+<text x="716" y="468" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="19" font-weight="700" fill="#1e527f" text-anchor="middle">핵심: 읽기 → 거래 1건 전달 → 검사 → 다음 거래 요청을 반복</text>
+<text x="57" y="559" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="800" fill="#142b49" text-anchor="start">② 데이터를 처리하는 두 방식</text>
+<rect x="48" y="578" width="650" height="228" rx="20" fill="#fff" stroke="#d6e2ef" stroke-width="1.5"/>
+<rect x="72" y="595" width="160" height="35" rx="17" fill="#fce8e8" stroke="none" stroke-width="1.5"/>
+<text x="152.0" y="620" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#a04b4b" text-anchor="middle">리스트 방식</text>
+<text x="83" y="656" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="20" font-weight="700" fill="#3d4e62" text-anchor="start">전체 파일</text>
+<line x1="175" y1="647" x2="249" y2="647" stroke="#9c5b5b" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="257" y="624" width="193" height="50" rx="10" fill="#ffe9e9" stroke="#e5adad" stroke-width="1.5"/>
+<text x="353" y="657" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="700" fill="#893f3f" text-anchor="middle">모두 메모리에 적재</text>
+<line x1="454" y1="647" x2="510" y2="647" stroke="#9c5b5b" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="518" y="624" width="153" height="50" rx="10" fill="#f1f5f9" stroke="#cad5e0" stroke-width="1.5"/>
+<text x="595" y="656" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="700" fill="#42566a" text-anchor="middle">한꺼번에 처리</text>
+<text x="88" y="719" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="600" fill="#7a4c4c" text-anchor="start">데이터가 많을수록 메모리 사용량 증가</text>
+<text x="88" y="752" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="500" fill="#617186" text-anchor="start">전체 데이터를 리스트로 만드는 방식의 특징</text>
+<rect x="713" y="578" width="679" height="228" rx="20" fill="#fff" stroke="#d6e2ef" stroke-width="1.5"/>
+<rect x="739" y="595" width="187" height="35" rx="17" fill="#d9f7ea" stroke="none" stroke-width="1.5"/>
+<text x="832.5" y="620" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="700" fill="#247b60" text-anchor="middle">제너레이터 방식</text>
+<text x="758" y="653" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="20" font-weight="700" fill="#3d4e62" text-anchor="start">파일</text>
+<line x1="805" y1="647" x2="855" y2="647" stroke="#26876c" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="862" y="624" width="241" height="50" rx="10" fill="#e7faef" stroke="#a3dcc4" stroke-width="1.5"/>
+<text x="982" y="655" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="700" fill="#266e58" text-anchor="middle">요청 시 거래 1건 제공</text>
+<line x1="1110" y1="647" x2="1160" y2="647" stroke="#26876c" stroke-width="3"  marker-end="url(#arr)"/>
+<rect x="1167" y="624" width="196" height="50" rx="10" fill="#f1f5f9" stroke="#cad5e0" stroke-width="1.5"/>
+<text x="1265" y="655" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="700" fill="#42566a" text-anchor="middle">순차 처리</text>
+<text x="754" y="719" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="18" font-weight="600" fill="#266e58" text-anchor="start">필요할 때 다음 값을 생성·전달</text>
+<text x="754" y="752" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="500" fill="#617186" text-anchor="start">메모리 부담을 줄이지만 파일 순회 비용은 남음</text>
+<text x="57" y="854" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="800" fill="#142b49" text-anchor="start">③ 개념의 핵심과 B2-1 적용</text>
+<rect x="48" y="871" width="1344" height="125" rx="20" fill="#edf4ff" stroke="#bcd1eb" stroke-width="1.5"/>
+<text x="82" y="912" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="20" font-weight="800" fill="#173d67" text-anchor="start">제너레이터(generator)</text>
+<text x="82" y="943" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="500" fill="#294969" text-anchor="start">yield로 값을 하나씩 제공하고, 다음 요청 전까지 실행 상태를 유지</text>
+<line x1="703" y1="895" x2="703" y2="975" stroke="#bed0e6" stroke-width="2"  />
+<text x="733" y="912" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="20" font-weight="800" fill="#173d67" text-anchor="start">B2-1 실제 활용</text>
+<text x="733" y="943" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="17" font-weight="500" fill="#294969" text-anchor="start">Repository.iter_transactions() → Service.select() / summary()</text>
+<text x="733" y="974" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-size="16" font-weight="500" fill="#48637f" text-anchor="start">CSV 가져오기에서도 단계적으로 데이터를 읽고 처리</text>
+</svg>

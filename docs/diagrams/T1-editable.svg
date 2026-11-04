@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900"><title>T1 클래스·모듈화와 책임 분리</title><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#50687c"/></marker></defs>
+<rect x="0" y="0" width="1280" height="900" rx="0" fill="#f7fafd" stroke="none" stroke-width="0"/>
+<rect x="40" y="35" width="1200" height="828" rx="25" fill="#fff" stroke="#e0e8f0" stroke-width="2"/>
+<text x="90" y="100" text-anchor="start" font-family="Noto Sans CJK KR" font-weight="700" font-size="34" fill="#15283b">T1  클래스·모듈화와 책임 분리</text>
+<text x="90" y="143" text-anchor="start" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#5a6e83">가계부 프로그램을 역할별로 나누어 서로 협력하게 만든다</text>
+<rect x="84" y="184" width="1112" height="63" rx="13" fill="#eaf1f9" stroke="none" stroke-width="0"/>
+<text x="640" y="223" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="600" font-size="21" fill="#15283b">사용자 명령 → 업무 판단 → 파일 저장   |   공통 데이터 모델로 검증</text>
+<rect x="87" y="290" width="235" height="158" rx="20" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+<text x="204" y="332" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="25" fill="#15283b">사용자</text>
+<text x="204" y="374" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">명령 입력</text>
+<text x="204" y="404" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">결과 확인</text>
+<rect x="348" y="290" width="235" height="158" rx="20" fill="#e4f7ee" stroke="#8bdbc0" stroke-width="2"/>
+<text x="465" y="332" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="25" fill="#15283b">CLI</text>
+<text x="465" y="374" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">명령 해석</text>
+<text x="465" y="404" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">입력·결과 출력</text>
+<rect x="609" y="290" width="235" height="158" rx="20" fill="#e3efff" stroke="#a4c7fa" stroke-width="2"/>
+<text x="726" y="332" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="25" fill="#15283b">Service</text>
+<text x="726" y="374" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">업무 규칙 실행</text>
+<text x="726" y="404" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">기능별 작업 조정</text>
+<rect x="870" y="290" width="235" height="158" rx="20" fill="#efe9ff" stroke="#cdbcfb" stroke-width="2"/>
+<text x="987" y="332" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="25" fill="#15283b">Repository</text>
+<text x="987" y="374" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">파일 읽기·쓰기</text>
+<text x="987" y="404" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">안전한 저장 관리</text>
+<path d="M322 369 H342" fill="none" stroke="#50687c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arr)"/>
+<path d="M583 369 H603" fill="none" stroke="#50687c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arr)"/>
+<path d="M844 369 H864" fill="none" stroke="#50687c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arr)"/>
+<rect x="611" y="540" width="235" height="145" rx="20" fill="#fff4d8" stroke="#f0cd72" stroke-width="2"/>
+<text x="728" y="578" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="25" fill="#15283b">Models</text>
+<text x="728" y="616" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">거래 데이터 구조</text>
+<text x="728" y="646" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="19" fill="#15283b">유효성 검사</text>
+<rect x="870" y="540" width="235" height="145" rx="20" fill="#ffedec" stroke="#f3b3ac" stroke-width="2"/>
+<text x="987" y="578" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="700" font-size="23" fill="#15283b">JSONL 저장 파일</text>
+<text x="987" y="616" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="18" fill="#15283b">거래 · 카테고리</text>
+<text x="987" y="646" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="400" font-size="18" fill="#15283b">예산 · 반복 규칙</text>
+<path d="M728 448 V533" fill="none" stroke="#50687c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arr)"/>
+<path d="M987 448 V533" fill="none" stroke="#50687c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arr)"/>
+<text x="794" y="501" text-anchor="middle" font-family="Noto Sans CJK KR" font-weight="500" font-size="16" fill="#64748b">모델 활용</text>
+<rect x="87" y="741" width="1018" height="81" rx="15" fill="#e8f4f2" stroke="#c1e0d8" stroke-width="2"/>
+<text x="116" y="773" text-anchor="start" font-family="Noto Sans CJK KR" font-weight="700" font-size="21" fill="#15283b">책임 분리의 효과</text>
+<text x="116" y="802" text-anchor="start" font-family="Noto Sans CJK KR" font-weight="400" font-size="18" fill="#15283b">기능을 이해하기 쉽고, 변경 시 영향 범위를 줄이며, 각 부분을 독립적으로 검증할 수 있다.</text>
+<text x="90" y="858" text-anchor="start" font-family="Noto Sans CJK KR" font-weight="400" font-size="16" fill="#64748b">※ 화살표는 주요 협력 관계를 단순화해 표현한 것으로, 실제 모든 함수 호출을 뜻하지는 않는다.</text>
+</svg>

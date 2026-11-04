@@ -1,0 +1,3 @@
+date,type,category,amount,memo,tags
+2026-11-04,expense,식비,5000,정상 행,식사
+2026-11-04,expense,교통,-1,금액 오류,통학

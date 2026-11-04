@@ -4,6 +4,10 @@ Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부�
 
 **제출 상태:** 사용자 승인 후 PR #1을 main에 병합했으며 Python 3.10·3.12에서 각각 117개 검수를 통과했다. [평가 대비 설명](docs/evaluation-guide.md)을 참고할 수 있다. 과거 운영·검수 문서는 [docs/toomuch](docs/toomuch/), 실행 로그는 [evidence/toomuch](evidence/toomuch/)에 보관한다. 공식 미션·평가표 원문은 사용자 요청에 따라 저장소에 포함하지 않는다.
 
+## 미션 시연 준비
+
+[10가지 기능 시연 명령어 모음](docs/mission-demo.md)에 가상 데이터 준비, 복사 가능한 Bash 명령, 예상 결과와 실패 사례를 정리했다. 저장소 루트에서 `python scripts/prepare_demo.py`를 실행하면 기존 데이터를 변경하지 않는 전용 시연 폴더를 만든다.
+
 ## 실행
 
 처음 받는 경우 Git으로 내려받고 저장소 루트에서 실행한다. GitHub ZIP으로 받은 경우에도 프로그램 실행에는 Git이 필요 없지만, SHA를 기록하는 개발용 smoke/benchmark 스크립트는 Git 체크아웃에서 사용한다.

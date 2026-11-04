@@ -8,6 +8,8 @@ Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부�
 
 [10가지 기능 시연 명령어 모음](docs/mission-demo.md)에 가상 데이터 준비, 복사 가능한 Bash 명령, 예상 결과와 실패 사례를 정리했다. 저장소 루트에서 `python scripts/prepare_demo.py`를 실행하면 기존 데이터를 변경하지 않는 전용 시연 폴더를 만든다.
 
+[보너스 4가지 독립 시연](docs/bonus-demo.md)은 `bash demos/bonus/commands.sh`로 별도 실행한다. 기본 데모와 다른 데이터 폴더를 매번 생성한다.
+
 ## 실행
 
 처음 받는 경우 Git으로 내려받고 저장소 루트에서 실행한다. GitHub ZIP으로 받은 경우에도 프로그램 실행에는 Git이 필요 없지만, SHA를 기록하는 개발용 smoke/benchmark 스크립트는 Git 체크아웃에서 사용한다.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# docs/mission-demo.md의 Bash 블록을 순서대로 실행하는 전체 리허설 명령 모음.
+# demos/mission/mission-demo.md의 Bash 블록을 순서대로 실행하는 전체 리허설 명령 모음.
 # 저장소 루트에서 bash demos/mission/commands.sh 로 실행한다.
 # 오류 시연 명령의 종료 코드 2는 예상된 결과다.
 # 매 실행마다 새 가상 데이터 폴더를 생성하고 기존 데이터는 변경하지 않는다.
@@ -21,6 +21,9 @@ expense
 시연 점심
 식사,학교
 INPUT
+
+# 추가 직후 별도 프로세스로 저장된 거래를 조회한다.
+python -m budget_app --data-dir "$DEMO_DIR" search --from 2026-11-04 --to 2026-11-04 --category 식비 --type expense --q '시연 점심' --tag 학교
 
 python -m budget_app --data-dir "$DEMO_DIR" list --limit 3
 

@@ -1,6 +1,6 @@
 # 보너스 4가지 독립 시연 (B01~B04)
 
-저장소 루트의 Bash 터미널에서 아래 블록을 순서대로 복사한다. Python 3.10 이상, 외부 패키지 불필요. 기본 데모의 `DEMO_DIR`를 사용하지 않는다. 전체 자동 리허설은 `bash demos/bonus/commands.sh`로 실행한다.
+저장소 루트의 Bash 터미널에서 아래 블록을 순서대로 복사한다. Python 3.10 이상, 외부 패키지 불필요. 기본 데모의 `DEMO_DIR`를 사용하지 않는다. 이 문서는 직접 결과를 읽으며 연습하는 수동 시연 안내다. `commands.sh`는 별도의 기존 자동 검증 방식이며, 이 문서의 수동 명령과는 다르다.
 
 ## 0. 별도 데이터 준비
 
@@ -15,83 +15,59 @@ python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 
 ## 1. 반복 내역 등록·생성 (B02)
 
+### 1-1. 규칙 등록 후 저장 내용 확인
+
 ```bash
 python -m budget_app --data-dir "$BONUS_DIR" recurring add --day 31 --type income --category 용돈 --amount 300000 --memo '가상 월급' --tags '정기'
 python -m budget_app --data-dir "$BONUS_DIR" recurring list
-python - "$BONUS_DIR" <<'PYTHON'
-import json
-from pathlib import Path
-import sys
-
-folder = Path(sys.argv[1])
-rules = [json.loads(line) for line in (folder / 'recurring.jsonl').read_text(encoding='utf-8').splitlines()]
-assert len(rules) == 1
-rule = rules[0]
-assert (rule['day'], rule['type'], rule['category'], rule['amount'], rule['memo'], rule['tags']) == (31, 'income', '용돈', 300000, '가상 월급', ['정기'])
-print('저장된 규칙:', json.dumps(rule, ensure_ascii=False))
-assert len((folder / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()) == 6
-print('PASS: 반복 규칙 저장 확인·등록만으로 거래가 생성되지 않음')
-PYTHON
-python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
-python -m budget_app --data-dir "$BONUS_DIR" search --q '가상 월급'
-python - "$BONUS_DIR" <<'PYTHON'
-import json
-from pathlib import Path
-import sys
-
-folder = Path(sys.argv[1])
-rows = [json.loads(line) for line in (folder / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()]
-rule = json.loads((folder / 'recurring.jsonl').read_text(encoding='utf-8'))
-generated = [row for row in rows if row.get('recurring_id') == rule['id']]
-assert len(rows) == 7 and len(generated) == 1
-row = generated[0]
-assert (row['date'], row['type'], row['category'], row['amount'], row['memo'], row['tags'], row['recurring_month']) == ('2026-11-30', 'income', '용돈', 300000, '가상 월급', ['정기'], '2026-11')
-print('생성된 거래:', json.dumps(row, ensure_ascii=False))
-print('PASS: 말일 보정·생성 거래 1건·규칙과 월 출처 확인')
-PYTHON
-REPEAT_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
-REPEAT_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-test "$REPEAT_BEFORE" = "$REPEAT_AFTER" || exit 1
-echo 'PASS: 재적용 후 거래·규칙·카테고리·예산 파일 모두 동일'
-python -m budget_app --data-dir "$BONUS_DIR" search --from 2026-11-01 --to 2026-11-30 --q '가상 월급'
+cat "$BONUS_DIR/recurring.jsonl"
+python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 ```
 
-예상: 규칙 `RR-...` 등록 → 첫 적용 `generated=1, skipped=0` → 재적용 `generated=0, skipped=1`. 11월에는 31일이 없어 11월 30일로 보정된다. 특정 월의 자동 생성은 `apply` 실행으로 시작하며 백그라운드 스케줄러는 없다. `recurring.jsonl`이 추가된다.
+확인: 규칙 1개가 표시되고 JSONL에 day 31, income, 용돈, amount 300000, 메모 가상 월급, 태그 정기가 저장돼 있다. 거래는 기존 6건뿐이며 가상 월급은 아직 없다. 규칙 등록과 거래 생성은 별개다.
 
-등록 직후에는 규칙 필드와 거래 미생성을, 첫 적용 직후에는 실제 거래의 날짜·금액·태그·출처를 확인한다. 재적용 전후에는 네 저장 파일 해시가 같은지 비교해 중복 추가가 없음을 확인한다.
-
-잘못된 날짜도 거부한다. 이 오류는 의도된 시연이다.
+### 1-2. 해당 월의 거래 생성 후 조회
 
 ```bash
-INVALID_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-if python -m budget_app --data-dir "$BONUS_DIR" recurring add --day 32 --type expense --category 식비 --amount 10000; then
-    echo 'FAIL: 잘못된 날짜를 허용함'; exit 1
-else
-    CODE=$?
-    test "$CODE" -eq 2 || exit 1
-    echo 'PASS: day 32 거부, 종료 코드 2'
-fi
-INVALID_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-test "$INVALID_BEFORE" = "$INVALID_AFTER" || exit 1
-echo 'PASS: 잘못된 규칙 등록 거부 후 모든 저장 파일 유지'
+python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
+python -m budget_app --data-dir "$BONUS_DIR" search --q '가상 월급'
+cat "$BONUS_DIR/transactions.jsonl"
 ```
+
+확인: `generated=1, skipped=0`. 가상 월급 300,000원 거래 1건이 보인다. 11월에는 31일이 없으므로 날짜는 2026-11-30이다. JSONL의 `recurring_id`는 규칙 ID, `recurring_month`는 2026-11이다. 전체 거래는 7건이다.
+
+### 1-3. 같은 월에 다시 적용해 중복 여부 확인
+
+```bash
+python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
+python -m budget_app --data-dir "$BONUS_DIR" search --q '가상 월급'
+python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
+```
+
+확인: `generated=0, skipped=1`. 가상 월급은 여전히 1건, 전체 거래도 7건이다. 특정 월의 자동 생성은 `apply`를 실행할 때 시작하며 백그라운드 스케줄러는 없다.
+
+### 1-4. 잘못된 규칙 등록 거부 확인
+
+```bash
+python -m budget_app --data-dir "$BONUS_DIR" recurring add --day 32 --type expense --category 식비 --amount 10000
+printf '종료 코드: %s (예상 2)\n' "$?"
+python -m budget_app --data-dir "$BONUS_DIR" recurring list
+cat "$BONUS_DIR/recurring.jsonl"
+```
+
+확인: day 32는 오류와 해결 힌트를 출력하며 거부된다. 이 오류는 의도된 시연이다. 규칙 목록과 파일에는 기존 가상 월급 규칙 1개만 남는다. 종료 코드는 실패 명령 바로 다음에 확인해야 한다.
 
 ## 2. 외부 라이브러리 없는 표 정렬 (B03)
 
 ```bash
-FORMAT_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 python -m budget_app --data-dir "$BONUS_DIR" search --type expense --limit 20
-FORMAT_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-test "$FORMAT_BEFORE" = "$FORMAT_AFTER" || exit 1
-echo 'PASS: 표 출력 전후 저장 데이터 동일'
-python -m unittest discover -s tests -p 'test_bonus_formatting.py' -v
+cat "$BONUS_DIR/transactions.jsonl"
 ```
 
-조회 전후 저장 파일 해시를 비교해 표시 과정이 원본을 바꾸지 않았음을 확인한다. 이어지는 포맷터 테스트는 열 경계·금액 오른쪽 정렬·제어문자 이스케이프를 검증한다.
+확인: 전체 목록은 7건, 지출 검색은 5건이다. 한글 메모·카테고리의 길이가 달라도 `|` 열 경계가 맞고 금액은 오른쪽 정렬된다. 파일의 원래 값은 그대로이며 표에 맞춘 공백은 화면 출력에만 사용한다.
 
-관찰: 한글 메모·카테고리의 길이가 달라도 `|` 열 경계가 맞고 금액은 오른쪽 정렬된다. 고정폭 글꼴의 터미널에서 확인한다. `budget_app/formatting.py`가 표준 라이브러리 `unicodedata`로 표시 폭을 계산한다. 복합 이모지는 터미널·폰트에 따라 폭 차이가 있을 수 있다.
+고정폭 글꼴의 터미널에서 확인한다. `budget_app/formatting.py`가 표준 라이브러리 `unicodedata`로 표시 폭을 계산한다. 복합 이모지는 터미널·폰트에 따라 폭 차이가 있을 수 있다. 이 단계는 눈으로 확인하는 시연이며 자동 정렬 테스트를 실행하지 않는다.
 
 ## 3. 백업·내용 검증·복원 확인 (B01)
 
@@ -150,21 +126,43 @@ python -m budget_app --data-dir "$BONUS_DIR/restored" summary --month 2026-11 --
 
 이 과정은 백업 파일을 별도 폴더에 직접 풀어 앱에서 재사용할 수 있음을 보여준다. 원래 보너스 데이터는 그대로 두고 `--data-dir`만 복원 폴더로 바꾼다. 앱 자체에 자동 복원 명령은 없다.
 
-## 4. 저장 원자성: update/delete 실패 시 원본 보존 (B04)
+## 4. 저장 원자성: 저장 코드와 수정·삭제 결과 확인 (B04)
+
+### 4-1. 저장 순서 설명
+
+[F7 파일 저장의 안전성 그림](../../docs/diagrams/F7-illustrated.png)을 보며 아래 소스 파일을 편집기로 연다.
 
 ```bash
-ATOMIC_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-python -m scripts.demo_atomicity "$BONUS_DIR"
-ATOMIC_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-test "$ATOMIC_BEFORE" = "$ATOMIC_AFTER" || exit 1
-echo 'PASS: 실패 주입 시연 후 보너스 원본 데이터도 그대로 유지'
-python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
+cat budget_app/repository.py
 ```
 
-이 도구는 보너스 데이터를 **또 다른 임시 폴더에 복사**한 뒤, 실행 중에만 `os.replace`가 실패하도록 모의 처리한다. 소스 파일·원래 보너스 데이터는 수정하지 않는다. 실제 디스크 고장이나 강제 종료를 유발하지 않는다.
+`_atomic_write()`에서 다음 순서를 찾는다.
 
-예상: update/delete 각각 종료 코드 3, 오류·힌트 출력, 전후 SHA-256 동일, 임시 파일·잠금 정리 `PASS`. 정상 저장은 임시 파일 기록 → flush/fsync → `os.replace`로 반영한다. 교체 후 동기화 실패는 별도 내구성 오류이며, 이번 시연은 교체 전 실패의 원본 보존을 확인한다. 다중 파일 트랜잭션·전원 장애 완전 내구성 보장은 아니다.
+1. `tempfile.mkstemp`: 원본과 같은 폴더에 임시 파일 생성
+2. `writer(handle)`: 변경 내용을 임시 파일에 기록
+3. `handle.flush()`와 `os.fsync()`: 기록을 밀어내고 동기화
+4. `os.replace(temporary, target)`: 완성된 임시 파일로 원본 교체
+
+교체 전까지 원본을 직접 수정하지 않는 구조임을 설명한다. 교체 후 동기화 실패는 변경이 이미 반영된 상태일 수 있으며, 무조건 재실행하면 안 된다.
+
+### 4-2. 전용 복사본에서 정상 수정·삭제 확인
+
+```bash
+mkdir "$BONUS_DIR/atomic-practice" && cp "$BONUS_DIR/"*.jsonl "$BONUS_DIR/atomic-practice/"
+PRACTICE_DIR="$BONUS_DIR/atomic-practice"
+python -m budget_app --data-dir "$PRACTICE_DIR" list --limit 20
+python -m budget_app --data-dir "$PRACTICE_DIR" update --id TX-00000000000340008000000000000001 --memo '원자적 저장 연습'
+python -m budget_app --data-dir "$PRACTICE_DIR" search --q '원자적 저장 연습'
+cat "$PRACTICE_DIR/transactions.jsonl"
+python -m budget_app --data-dir "$PRACTICE_DIR" delete --id TX-00000000000340008000000000000001
+python -m budget_app --data-dir "$PRACTICE_DIR" list --limit 20
+python -m budget_app --data-dir "$BONUS_DIR" search --q '학교 점심'
+```
+
+확인: 복사본에서 학교 점심의 메모가 변경되고, 같은 ID를 삭제하면 목록에서 사라진다. 복사본 거래는 7건에서 6건이 된다. 마지막 명령은 원래 보너스 폴더의 학교 점심이 여전히 남아 있음을 보여준다. 연습 폴더가 이미 있으면 덮어쓰지 말고 0번부터 새 폴더로 시작한다.
+
+**이 단계는 저장 코드 설명과 정상 동작 시연이다. 교체 실패를 실제로 발생시켜 원본 보존을 입증하는 검증은 포함하지 않는다.** 실패 주입 스크립트나 자동 검증 테스트는 실행하지 않는다. 다중 파일 트랜잭션·전원 장애 완전 내구성을 보장한다는 의미도 아니다.
 
 ## 시연 종료
 
-데이터와 백업은 출력된 `BONUS_DIR`에 유지된다. 기본 미션 데모와 순서·실행 상태를 공유하지 않으며, 기본 데모를 먼저 실행할 필요가 없다. 기능별 확인 대상은 B01(백업), B02(반복), B03(표 정렬), B04/T16(원자적 교체)이다. 발표자가 화면을 보고 설명하는 최종 검수는 별도로 진행한다.
+데이터와 백업은 출력된 `BONUS_DIR`에 유지된다. 기본 미션 데모와 순서·실행 상태를 공유하지 않으며, 기본 데모를 먼저 실행할 필요가 없다. 기능별 확인 대상은 B01(백업), B02(반복), B03(표 정렬), B04(저장 구조 설명·정상 수정/삭제)이다. T16의 교체 실패 검증은 이 수동 시연에 포함되지 않는다. 발표자가 화면을 보고 설명하는 최종 검수는 별도로 진행한다.

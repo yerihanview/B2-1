@@ -93,57 +93,62 @@ python -m unittest discover -s tests -p 'test_bonus_formatting.py' -v
 
 관찰: 한글 메모·카테고리의 길이가 달라도 `|` 열 경계가 맞고 금액은 오른쪽 정렬된다. 고정폭 글꼴의 터미널에서 확인한다. `budget_app/formatting.py`가 표준 라이브러리 `unicodedata`로 표시 폭을 계산한다. 복합 이모지는 터미널·폰트에 따라 폭 차이가 있을 수 있다.
 
-## 3. 타임스탬프 백업·내용 검증·복원 확인 (B01)
+## 3. 백업·내용 검증·복원 확인 (B01)
+
+한 명령씩 실행하면서 **ZIP 생성 → 압축 해제 → 파일 4개 확인 → 복원 폴더로 프로그램 실행** 순서로 확인한다. 여기서는 해시 비교 대신 파일 내용과 복원 후 실행 결과를 직접 확인한다. `commands.sh`는 기존의 자동 해시 검증 방식을 유지한다.
+
+### 3-1. ZIP 생성
 
 ```bash
-BACKUP_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-python -m budget_app --data-dir "$BONUS_DIR" backup
-FIRST_BACKUP_HASH="$(python -c 'import hashlib,os,pathlib; files=list((pathlib.Path(os.environ["BONUS_DIR"])/"backups").glob("*.zip")); assert len(files)==1; print(hashlib.sha256(files[0].read_bytes()).hexdigest())')"
-echo "첫 백업 SHA-256: $FIRST_BACKUP_HASH"
-python -m budget_app --data-dir "$BONUS_DIR" backup
-python - "$BONUS_DIR" "$FIRST_BACKUP_HASH" <<'PY'
-import hashlib
-import json
-from pathlib import Path
-import re
-import sys
-import zipfile
-
-folder = Path(sys.argv[1])
-archives = sorted((folder / 'backups').glob('*.zip'))
-assert len(archives) == 2
-assert hashlib.sha256(archives[0].read_bytes()).hexdigest() == sys.argv[2]
-print('PASS: 두 번째 백업 후 첫 백업 파일 보존')
-restored = folder / 'restored'
-restored.mkdir()  # 기존 복원 폴더가 있으면 덮어쓰지 않고 중단한다.
-for path in archives:
-    print('백업 파일:', path.name)
-    assert re.fullmatch(r'backup-\d{8}T\d{12}Z-[0-9a-f]{32}\.zip', path.name)
-    with zipfile.ZipFile(path) as archive:
-        manifest = json.loads(archive.read('manifest.json'))
-        assert manifest['format'] == 'budget_app_backup' and manifest['version'] == 1
-        assert set(manifest['files']) == {'transactions.jsonl', 'categories.jsonl', 'budgets.jsonl', 'recurring.jsonl'}
-        assert set(archive.namelist()) == set(manifest['files']) | {'manifest.json'}
-        for name, info in manifest['files'].items():
-            raw = archive.read(name)
-            assert raw == (folder / name).read_bytes()
-            assert len(raw) == info['size']
-            assert hashlib.sha256(raw).hexdigest() == info['sha256']
-            print('검증:', name, info['sha256'])
-            if path == archives[-1]:
-                (restored / name).write_bytes(raw)
-print('PASS: 서로 다른 백업 2개·원본 바이트·해시 일치·새 폴더 복원')
-PY
-python -m budget_app --data-dir "$BONUS_DIR/restored" recurring list
-python -m budget_app --data-dir "$BONUS_DIR/restored" summary --month 2026-11 --top 3
-BACKUP_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
-test "$BACKUP_BEFORE" = "$BACKUP_AFTER" || exit 1
-echo 'PASS: 백업·복원 확인 후 원본 저장 파일 모두 유지'
+python -m budget_app --data-dir "$BONUS_DIR" backup --out-dir "$BONUS_DIR/demo-backup"
+ls "$BONUS_DIR/demo-backup/"*.zip
 ```
 
-첫 백업 직후 해시를 보관하고 두 번째 백업 뒤에도 첫 파일이 동일한지 확인한다. 백업·복원 조회 전후 원본 네 파일도 그대로 유지되는지 비교한다.
+예상: 생성 시각과 고유 ID가 들어간 `backup-날짜시간-UUID.zip` 파일 1개가 보인다. 이 단계는 새로 준비한 보너스 폴더에서 한 번 실행한다. 기본 백업 폴더와 구분하기 위해 이번 시연은 `--out-dir`로 `demo-backup` 폴더를 지정한다.
 
-예상: `backup-UTC타임스탬프-UUID.zip` 두 개. 필수 3파일과 반복 규칙 파일, 크기·SHA-256 목록이 포함된다. 잠금 파일과 기존 백업은 포함되지 않는다. 새 폴더에 수동 복원 후 규칙 조회와 요약에 성공한다. 11월 수입 600,000 / 지출 100,000 / 잔액 500,000원. 앱 자체에 자동 복원 명령은 없다.
+### 3-2. 압축 해제
+
+```bash
+for BACKUP_ZIP in "$BONUS_DIR/demo-backup/"*.zip; do
+    printf '압축을 풀 백업: %s\n' "$BACKUP_ZIP"
+done
+mkdir "$BONUS_DIR/restored" && python -m zipfile -e "$BACKUP_ZIP" "$BONUS_DIR/restored"
+```
+
+위에서 만든 ZIP을 새 `restored` 폴더에 푼다. 외부 압축 도구 없이 Python 표준 라이브러리를 사용한다. 복원 폴더가 이미 있으면 `mkdir`가 실패하고 압축 해제를 실행하지 않는다. 다시 연습하려면 0번부터 새 보너스 폴더를 준비한다.
+
+### 3-3. 파일 4개와 내용 확인
+
+```bash
+ls "$BONUS_DIR/restored/"*.jsonl
+for NAME in transactions.jsonl categories.jsonl budgets.jsonl recurring.jsonl; do
+    printf '\n=== %s ===\n' "$NAME"
+    cat "$BONUS_DIR/restored/$NAME"
+done
+```
+
+다음 네 파일을 확인한다.
+
+| 파일 | 예상 내용 |
+|---|---|
+| `transactions.jsonl` | 기존 거래 6건 + 생성된 가상 월급 1건, 총 7건 |
+| `categories.jsonl` | 용돈·식비·교통·도서, 총 4개 |
+| `budgets.jsonl` | 예산을 등록하지 않았으므로 빈 파일 |
+| `recurring.jsonl` | 매월 31일 가상 월급 300,000원 규칙 1건 |
+
+ZIP에는 위 네 데이터 파일 외에 파일 크기·해시 목록인 `manifest.json`도 있다. 따라서 압축 해제 폴더의 전체 파일 수는 5개다. 위 `ls`는 JSONL 데이터 파일 4개만 보여준다. 이번 수동 시연에서는 해시 목록을 계산·비교하지 않는다.
+
+### 3-4. 복원 폴더로 프로그램 실행
+
+```bash
+python -m budget_app --data-dir "$BONUS_DIR/restored" list --limit 20
+python -m budget_app --data-dir "$BONUS_DIR/restored" recurring list
+python -m budget_app --data-dir "$BONUS_DIR/restored" summary --month 2026-11 --top 3
+```
+
+예상: 복원한 거래 7건과 반복 규칙 1건이 조회된다. 11월 수입 600,000 / 지출 100,000 / 잔액 500,000원이다. 10월 거래 1건은 목록에는 보이지만 11월 요약에서는 제외된다.
+
+이 과정은 백업 파일을 별도 폴더에 직접 풀어 앱에서 재사용할 수 있음을 보여준다. 원래 보너스 데이터는 그대로 두고 `--data-dir`만 복원 폴더로 바꾼다. 앱 자체에 자동 복원 명령은 없다.
 
 ## 4. 저장 원자성: update/delete 실패 시 원본 보존 (B04)
 

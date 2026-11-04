@@ -18,16 +18,53 @@ python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 ```bash
 python -m budget_app --data-dir "$BONUS_DIR" recurring add --day 31 --type income --category 용돈 --amount 300000 --memo '가상 월급' --tags '정기'
 python -m budget_app --data-dir "$BONUS_DIR" recurring list
+python - "$BONUS_DIR" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+folder = Path(sys.argv[1])
+rules = [json.loads(line) for line in (folder / 'recurring.jsonl').read_text(encoding='utf-8').splitlines()]
+assert len(rules) == 1
+rule = rules[0]
+assert (rule['day'], rule['type'], rule['category'], rule['amount'], rule['memo'], rule['tags']) == (31, 'income', '용돈', 300000, '가상 월급', ['정기'])
+print('저장된 규칙:', json.dumps(rule, ensure_ascii=False))
+assert len((folder / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()) == 6
+print('PASS: 반복 규칙 저장 확인·등록만으로 거래가 생성되지 않음')
+PYTHON
 python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
+python -m budget_app --data-dir "$BONUS_DIR" search --q '가상 월급'
+python - "$BONUS_DIR" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+folder = Path(sys.argv[1])
+rows = [json.loads(line) for line in (folder / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()]
+rule = json.loads((folder / 'recurring.jsonl').read_text(encoding='utf-8'))
+generated = [row for row in rows if row.get('recurring_id') == rule['id']]
+assert len(rows) == 7 and len(generated) == 1
+row = generated[0]
+assert (row['date'], row['type'], row['category'], row['amount'], row['memo'], row['tags'], row['recurring_month']) == ('2026-11-30', 'income', '용돈', 300000, '가상 월급', ['정기'], '2026-11')
+print('생성된 거래:', json.dumps(row, ensure_ascii=False))
+print('PASS: 말일 보정·생성 거래 1건·규칙과 월 출처 확인')
+PYTHON
+REPEAT_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 python -m budget_app --data-dir "$BONUS_DIR" recurring apply --month 2026-11
+REPEAT_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
+test "$REPEAT_BEFORE" = "$REPEAT_AFTER" || exit 1
+echo 'PASS: 재적용 후 거래·규칙·카테고리·예산 파일 모두 동일'
 python -m budget_app --data-dir "$BONUS_DIR" search --from 2026-11-01 --to 2026-11-30 --q '가상 월급'
 ```
 
 예상: 규칙 `RR-...` 등록 → 첫 적용 `generated=1, skipped=0` → 재적용 `generated=0, skipped=1`. 11월에는 31일이 없어 11월 30일로 보정된다. 특정 월의 자동 생성은 `apply` 실행으로 시작하며 백그라운드 스케줄러는 없다. `recurring.jsonl`이 추가된다.
 
+등록 직후에는 규칙 필드와 거래 미생성을, 첫 적용 직후에는 실제 거래의 날짜·금액·태그·출처를 확인한다. 재적용 전후에는 네 저장 파일 해시가 같은지 비교해 중복 추가가 없음을 확인한다.
+
 잘못된 날짜도 거부한다. 이 오류는 의도된 시연이다.
 
 ```bash
+INVALID_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 if python -m budget_app --data-dir "$BONUS_DIR" recurring add --day 32 --type expense --category 식비 --amount 10000; then
     echo 'FAIL: 잘못된 날짜를 허용함'; exit 1
 else
@@ -35,23 +72,36 @@ else
     test "$CODE" -eq 2 || exit 1
     echo 'PASS: day 32 거부, 종료 코드 2'
 fi
+INVALID_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
+test "$INVALID_BEFORE" = "$INVALID_AFTER" || exit 1
+echo 'PASS: 잘못된 규칙 등록 거부 후 모든 저장 파일 유지'
 ```
 
 ## 2. 외부 라이브러리 없는 표 정렬 (B03)
 
 ```bash
+FORMAT_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 python -m budget_app --data-dir "$BONUS_DIR" search --type expense --limit 20
+FORMAT_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
+test "$FORMAT_BEFORE" = "$FORMAT_AFTER" || exit 1
+echo 'PASS: 표 출력 전후 저장 데이터 동일'
+python -m unittest discover -s tests -p 'test_bonus_formatting.py' -v
 ```
+
+조회 전후 저장 파일 해시를 비교해 표시 과정이 원본을 바꾸지 않았음을 확인한다. 이어지는 포맷터 테스트는 열 경계·금액 오른쪽 정렬·제어문자 이스케이프를 검증한다.
 
 관찰: 한글 메모·카테고리의 길이가 달라도 `|` 열 경계가 맞고 금액은 오른쪽 정렬된다. 고정폭 글꼴의 터미널에서 확인한다. `budget_app/formatting.py`가 표준 라이브러리 `unicodedata`로 표시 폭을 계산한다. 복합 이모지는 터미널·폰트에 따라 폭 차이가 있을 수 있다.
 
 ## 3. 타임스탬프 백업·내용 검증·복원 확인 (B01)
 
 ```bash
+BACKUP_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 python -m budget_app --data-dir "$BONUS_DIR" backup
+FIRST_BACKUP_HASH="$(python -c 'import hashlib,os,pathlib; files=list((pathlib.Path(os.environ["BONUS_DIR"])/"backups").glob("*.zip")); assert len(files)==1; print(hashlib.sha256(files[0].read_bytes()).hexdigest())')"
+echo "첫 백업 SHA-256: $FIRST_BACKUP_HASH"
 python -m budget_app --data-dir "$BONUS_DIR" backup
-python - "$BONUS_DIR" <<'PY'
+python - "$BONUS_DIR" "$FIRST_BACKUP_HASH" <<'PY'
 import hashlib
 import json
 from pathlib import Path
@@ -62,6 +112,8 @@ import zipfile
 folder = Path(sys.argv[1])
 archives = sorted((folder / 'backups').glob('*.zip'))
 assert len(archives) == 2
+assert hashlib.sha256(archives[0].read_bytes()).hexdigest() == sys.argv[2]
+print('PASS: 두 번째 백업 후 첫 백업 파일 보존')
 restored = folder / 'restored'
 restored.mkdir()  # 기존 복원 폴더가 있으면 덮어쓰지 않고 중단한다.
 for path in archives:
@@ -84,14 +136,24 @@ print('PASS: 서로 다른 백업 2개·원본 바이트·해시 일치·새 폴
 PY
 python -m budget_app --data-dir "$BONUS_DIR/restored" recurring list
 python -m budget_app --data-dir "$BONUS_DIR/restored" summary --month 2026-11 --top 3
+BACKUP_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
+test "$BACKUP_BEFORE" = "$BACKUP_AFTER" || exit 1
+echo 'PASS: 백업·복원 확인 후 원본 저장 파일 모두 유지'
 ```
+
+첫 백업 직후 해시를 보관하고 두 번째 백업 뒤에도 첫 파일이 동일한지 확인한다. 백업·복원 조회 전후 원본 네 파일도 그대로 유지되는지 비교한다.
 
 예상: `backup-UTC타임스탬프-UUID.zip` 두 개. 필수 3파일과 반복 규칙 파일, 크기·SHA-256 목록이 포함된다. 잠금 파일과 기존 백업은 포함되지 않는다. 새 폴더에 수동 복원 후 규칙 조회와 요약에 성공한다. 11월 수입 600,000 / 지출 100,000 / 잔액 500,000원. 앱 자체에 자동 복원 명령은 없다.
 
 ## 4. 저장 원자성: update/delete 실패 시 원본 보존 (B04)
 
 ```bash
+ATOMIC_BEFORE="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
 python -m scripts.demo_atomicity "$BONUS_DIR"
+ATOMIC_AFTER="$(python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["BONUS_DIR"]); print([(f.name,hashlib.sha256(f.read_bytes()).hexdigest()) for f in sorted(p.glob("*.jsonl"))])')"
+test "$ATOMIC_BEFORE" = "$ATOMIC_AFTER" || exit 1
+echo 'PASS: 실패 주입 시연 후 보너스 원본 데이터도 그대로 유지'
+python -m budget_app --data-dir "$BONUS_DIR" list --limit 20
 ```
 
 이 도구는 보너스 데이터를 **또 다른 임시 폴더에 복사**한 뒤, 실행 중에만 `os.replace`가 실패하도록 모의 처리한다. 소스 파일·원래 보너스 데이터는 수정하지 않는다. 실제 디스크 고장이나 강제 종료를 유발하지 않는다.

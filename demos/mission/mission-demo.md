@@ -114,31 +114,76 @@ python -m budget_app --data-dir "$DEMO_DIR" summary --month 2026-11 --top 3
 printf '임시분류\n' | python -m budget_app --data-dir "$DEMO_DIR" category add
 python -m budget_app --data-dir "$DEMO_DIR" category list
 printf '임시분류\n' | python -m budget_app --data-dir "$DEMO_DIR" category remove
+python -m budget_app --data-dir "$DEMO_DIR" category list
 printf '식비\n' | python -m budget_app --data-dir "$DEMO_DIR" category remove
 CATEGORY_EXIT=$?
 printf '사용 중 카테고리 삭제 종료 코드: %s (예상 2)\n' "$CATEGORY_EXIT"
 test "$CATEGORY_EXIT" -eq 2
+python -m budget_app --data-dir "$DEMO_DIR" category list
+python - "$DEMO_DIR" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+names = {json.loads(line)['name'] for line in (Path(sys.argv[1]) / 'categories.jsonl').read_text(encoding='utf-8').splitlines()}
+assert '임시분류' not in names and '식비' in names
+assert names == {'용돈', '식비', '교통', '도서'}
+print('PASS: 임시분류 삭제 확인·삭제 거부된 식비와 나머지 분류 유지')
+PYTHON
 ```
 
-예상: 미사용 카테고리는 추가·삭제 성공. 식비는 참조 거래 4건 때문에 삭제 거부. 오류 원인·해결 힌트가 나오고 traceback은 없다. 대화형으로 보여주려면 `printf ... |` 부분을 빼고 프롬프트에 카테고리를 입력한다.
+예상: 미사용 카테고리는 추가·삭제 성공. 삭제 직후 목록에서 임시분류가 사라지고, 식비 삭제 거부 후에는 식비가 그대로 남아 있음을 확인한다. 식비는 참조 거래 4건 때문에 삭제 거부. 오류 원인·해결 힌트가 나오고 traceback은 없다. 대화형으로 보여주려면 `printf ... |` 부분을 빼고 프롬프트에 카테고리를 입력한다.
 
 ## 7. 거래 수정(update) — A01,A06,A07 / T06
 
 ```bash
+python -m budget_app --data-dir "$DEMO_DIR" search --q '학교 점심'
 python -m budget_app --data-dir "$DEMO_DIR" update --id "$LUNCH_ID" --memo '수정된 학교 점심' --tags '식사,학교,수정'
-python -m budget_app --data-dir "$DEMO_DIR" search --q '수정된 학교 점심'
+python -m budget_app --data-dir "$DEMO_DIR" search --q '수정된 학교 점심' --tag 수정
+python - "$DEMO_DIR" "$LUNCH_ID" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+identifier = sys.argv[2]
+def find(path):
+    return next(row for row in map(json.loads, path.read_text(encoding='utf-8').splitlines()) if row['id'] == identifier)
+
+before = find(Path('demos/mission/data/transactions.jsonl'))
+after = find(Path(sys.argv[1]) / 'transactions.jsonl')
+print('수정 전:', json.dumps(before, ensure_ascii=False))
+print('수정 후:', json.dumps(after, ensure_ascii=False))
+expected = dict(before, memo='수정된 학교 점심', tags=['식사', '학교', '수정'])
+assert after == expected
+print('PASS: 메모·태그만 변경, ID·날짜·타입·카테고리·금액 유지')
+PYTHON
 python -m budget_app --data-dir "$DEMO_DIR" update --id "$MISSING_ID" --memo '없는 거래'
 UPDATE_EXIT=$?
 printf '없는 ID 수정 종료 코드: %s (예상 2)\n' "$UPDATE_EXIT"
 test "$UPDATE_EXIT" -eq 2
 ```
 
-예상: 원래 학교 점심의 ID·금액은 유지되고 메모·태그만 변경. 없는 ID는 실패. 수정 방식은 옵션 방식으로 고정되어 있다.
+예상: 수정 전·후 검색 결과와 저장 레코드를 표시한다. 원래 학교 점심의 ID·날짜·타입·카테고리·금액은 유지되고 메모·태그만 변경된다. 표에 없는 태그도 JSON과 `--tag 수정` 검색으로 확인한다. 없는 ID는 실패. 수정 방식은 옵션 방식으로 고정되어 있다.
 
 ## 8. 거래 삭제(delete) — A01,A06,A07 / T07
 
 ```bash
 python -m budget_app --data-dir "$DEMO_DIR" delete --id "$BOOK_ID"
+python -m budget_app --data-dir "$DEMO_DIR" list --limit 20
+python - "$DEMO_DIR" "$BOOK_ID" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+folder = Path(sys.argv[1])
+rows = [json.loads(line) for line in (folder / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()]
+seed = [json.loads(line) for line in Path('demos/mission/data/transactions.jsonl').read_text(encoding='utf-8').splitlines()]
+remaining = {row['id'] for row in rows}
+assert sys.argv[2] not in remaining
+assert {row['id'] for row in seed if row['id'] != sys.argv[2]} <= remaining
+assert len(rows) == 6 and sum(row['memo'] == '시연 점심' for row in rows) == 1
+print('PASS: 삭제 ID 없음·나머지 거래 유지·전체 6건')
+PYTHON
 python -m budget_app --data-dir "$DEMO_DIR" delete --id "$BOOK_ID"
 DELETE_EXIT=$?
 printf '없는 ID 삭제 종료 코드: %s (예상 2)\n' "$DELETE_EXIT"
@@ -146,16 +191,33 @@ test "$DELETE_EXIT" -eq 2
 python -m budget_app --data-dir "$DEMO_DIR" summary --month 2026-11 --top 3
 ```
 
-시연용 파이썬 책 1건을 삭제한다. 확인 프롬프트는 없다. 두 번째 삭제는 없는 ID 오류. 11월 지출 90,000원 / 잔액 210,000원 / 예산 사용률 90.0%로 변경된다.
+시연용 파이썬 책 1건을 삭제한다. 바로 목록 전체를 출력해 해당 ID가 없고, 원래의 다른 거래 5건과 추가한 시연 점심 1건이 남아 있는지 확인한다. 확인 프롬프트는 없다. 두 번째 삭제는 없는 ID 오류. 11월 지출 90,000원 / 잔액 210,000원 / 예산 사용률 90.0%로 변경된다.
 
 ## 9. 가져오기(import) — A05,A16 / T09,T13,T19
 
 ```bash
 python -m budget_app --data-dir "$DEMO_DIR" import --from demos/mission/import.csv
+python -m budget_app --data-dir "$DEMO_DIR" search --from 2026-11-04 --to 2026-11-04 --q 가상
+python - "$DEMO_DIR" <<'PYTHON'
+import json
+from pathlib import Path
+import sys
+
+rows = [json.loads(line) for line in (Path(sys.argv[1]) / 'transactions.jsonl').read_text(encoding='utf-8').splitlines()]
+imported = [row for row in rows if row['memo'] in ('가상 간식', '가상 버스')]
+assert len(imported) == 2
+assert {(row['date'], row['type'], row['category'], row['amount'], row['memo'], tuple(row['tags'])) for row in imported} == {
+    ('2026-11-04', 'expense', '식비', 5000, '가상 간식', ('식사', '학교')),
+    ('2026-11-04', 'expense', '교통', 7000, '가상 버스', ('통학',)),
+}
+for row in imported:
+    print('가져온 거래:', json.dumps(row, ensure_ascii=False))
+print('PASS: 가져온 2건의 날짜·타입·카테고리·금액·메모·태그 확인')
+PYTHON
 python -m budget_app --data-dir "$DEMO_DIR" summary --month 2026-11 --top 3
 ```
 
-예상: `imported=2, skipped=0`. 간식 5,000원과 버스 7,000원 추가. 11월 지출 102,000원 / 잔액 198,000원 / 사용률 102.0%와 초과 경고. 같은 CSV를 다시 가져오면 새 ID로 중복 추가되므로 한 번만 실행한다.
+예상: `imported=2, skipped=0`. 이어지는 검색에서 가상 버스 → 가상 간식 순서로 2건이 표시되며 저장된 각 필드도 검증한다. 간식 5,000원과 버스 7,000원 추가. 11월 지출 102,000원 / 잔액 198,000원 / 사용률 102.0%와 초과 경고. 같은 CSV를 다시 가져오면 새 ID로 중복 추가되므로 한 번만 실행한다.
 
 정상 행과 오류 행이 섞인 CSV의 전체 미반영도 확인한다.
 

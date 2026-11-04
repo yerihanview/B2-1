@@ -6,9 +6,9 @@ Python 3.10+ 표준 라이브러리만 사용하는 파일 기반 CLI 가계부�
 
 ## 미션 시연 준비
 
-[10가지 기능 시연 명령어 모음](docs/mission-demo.md)에 가상 데이터 준비, 복사 가능한 Bash 명령, 예상 결과와 실패 사례를 정리했다. 저장소 루트에서 `python scripts/prepare_demo.py`를 실행하면 기존 데이터를 변경하지 않는 전용 시연 폴더를 만든다.
+[10가지 기능 시연 명령어 모음](demos/mission/mission-demo.md)에 가상 데이터 준비, 복사 가능한 Bash 명령, 예상 결과와 실패 사례를 정리했다. 저장소 루트에서 `python scripts/prepare_demo.py`를 실행하면 기존 데이터를 변경하지 않는 전용 시연 폴더를 만든다.
 
-[보너스 4가지 독립 시연](docs/bonus-demo.md)은 `bash demos/bonus/commands.sh`로 별도 실행한다. 기본 데모와 다른 데이터 폴더를 매번 생성한다.
+[보너스 4가지 독립 시연](demos/bonus/bonus-demo.md)은 `bash demos/bonus/commands.sh`로 별도 실행한다. 기본 데모와 다른 데이터 폴더를 매번 생성한다.
 
 ## 실행
 
